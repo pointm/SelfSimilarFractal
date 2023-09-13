@@ -1,3 +1,0 @@
-# This file is used internally by FFMPEG.
-file 'file:C:/Users/Feynman/Documents/00课件-2023春-2023秋/manim_projekt/media/videos/茱莉亚集合/1080p60/partial_movie_files/NewJulia/uncached_00000.mp4'
-file 'file:C:/Users/Feynman/Documents/00课件-2023春-2023秋/manim_projekt/media/videos/茱莉亚集合/1080p60/partial_movie_files/NewJulia/uncached_00001.mp4'
