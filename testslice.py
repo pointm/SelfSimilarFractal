@@ -65,46 +65,51 @@ class SelfSimilarFractal(VMobject):
         raise Exception("Not implemented")
 
 
-class Sierpinski(SelfSimilarFractal):
+class DiamondFractal(SelfSimilarFractal):
+    num_subparts = 4
+    height = 4
+    colors = [GREEN_E, YELLOW]
+
     def get_seed_shape(self):
-        return Polygon(
-            RIGHT, np.sqrt(3) * UP, LEFT,
-        )
+        return RegularPolygon(n=4)
 
     def arrange_subparts(self, *subparts):
-        tri1, tri2, tri3 = subparts
-        tri1.move_to(tri2.get_corner(DOWN + LEFT), UP)
-        tri3.move_to(tri2.get_corner(DOWN + RIGHT), UP)
+        # VGroup(*subparts).rotate(np.pi/4)
+        for part, vect in zip(subparts, compass_directions(start_vect=UP + RIGHT)):
+            part.next_to(ORIGIN, vect, buff=0)
+        VGroup(*subparts).rotate(np.pi / 4, about_point=ORIGIN)
 
 
-class TestSierpinski(Scene):
+class TestDiamondFractal(Scene):
+    '''
+        没错，这个测试代码是按照上面的谢尔宾斯基三角形的测试代码改过来的
+    '''
         # 定义一个函数，接受一个vgroup对象作为参数
-    def sierpinsk_ita(self, vgroup):#函数默认应该加上一个self函数
-        # 将原先的vgroup复制三份，装入列表中
-        var = [vgroup.copy() for i in range(3)]
-        # 把三个迭代的vgroup的位置放到位
-        Sierpinski().arrange_subparts(*var)#这时候就把三个三角形的位置放到位了
+    def diamond_ita(self, vgroup):#函数默认应该加上一个self函数
+        # 将原先的vgroup复制四份，装入列表中
+        var = [vgroup.copy() for i in range(4)]
+        # 把四个迭代的vgroup的位置放到位
+        DiamondFractal().arrange_subparts(*var)#这时候就把四个四边形的位置放到位了
         #不需要设置任何的原函数参数返回
         # 把原先的列表转化为VGroup，不然的话不好调用后面的move_to和scale等方法
-        sierpinskistage = VGroup()
-        sierpinskistage.add(*var)
+        diamondstage = VGroup()
+        diamondstage.add(*var)
         # 把VGroup移动到原点
-        sierpinskistage.move_to(ORIGIN)
+        diamondstage.move_to(ORIGIN)
         # 返回VGroup对象
-        return sierpinskistage
+        return diamondstage
 
     def construct(self):
 
-        sierpinskistage = VGroup()
-        sierpinskistage.add(Sierpinski().get_seed_shape())#得到种子图像
-        sierpinskistage.set_opacity(0.5).set_color([RED, YELLOW, BLUE])#顺便调整种子图像的透明度与颜色
+        diamondstage = VGroup()
+        diamondstage.add(DiamondFractal().get_seed_shape())#得到种子图像
+        diamondstage.set_opacity(0.5).set_color([RED, YELLOW, BLUE])#顺便调整种子图像的透明度与颜色
         
 
-        #调用sierpinsk_ita开始迭代
-        #不写一整个循环的主要原因是要手动调整三角形的大小，，，
-        #如果一直只缩放0.75倍的话，后面迭代的话就会超出屏幕
+        #调用diamond_ita开始迭代
+        #不写一整个循环的主要原因是要手动调整四边形的大小，，，
+        #如果一直只缩放0.65倍的话，后面迭代的话就会超出屏幕
         for i in range(3):
-            self.play(Transform(sierpinskistage, self.sierpinsk_ita(sierpinskistage).scale(0.75)))
+            self.play(Transform(diamondstage, self.diamond_ita(diamondstage).scale(0.65)))
         for i in range(3):
-            self.play(Transform(sierpinskistage, self.sierpinsk_ita(sierpinskistage).scale(0.55)))
-        
+            self.play(Transform(diamondstage, self.diamond_ita(diamondstage).scale(0.45)))      

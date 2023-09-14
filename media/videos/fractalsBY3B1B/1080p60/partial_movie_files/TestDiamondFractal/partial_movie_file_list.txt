@@ -1,0 +1,7 @@
+# This file is used internally by FFMPEG.
+file 'file:C:/Users/Feynman/Documents/00课件-2023春-2023秋/GitGubStatus/JuliaSetinManim/media/videos/fractalsBY3B1B/1080p60/partial_movie_files/TestDiamondFractal/1413466013_2232421320_235106377.mp4'
+file 'file:C:/Users/Feynman/Documents/00课件-2023春-2023秋/GitGubStatus/JuliaSetinManim/media/videos/fractalsBY3B1B/1080p60/partial_movie_files/TestDiamondFractal/1672018281_542162603_235106377.mp4'
+file 'file:C:/Users/Feynman/Documents/00课件-2023春-2023秋/GitGubStatus/JuliaSetinManim/media/videos/fractalsBY3B1B/1080p60/partial_movie_files/TestDiamondFractal/1672018281_1207454126_235106377.mp4'
+file 'file:C:/Users/Feynman/Documents/00课件-2023春-2023秋/GitGubStatus/JuliaSetinManim/media/videos/fractalsBY3B1B/1080p60/partial_movie_files/TestDiamondFractal/1672018281_3167884030_235106377.mp4'
+file 'file:C:/Users/Feynman/Documents/00课件-2023春-2023秋/GitGubStatus/JuliaSetinManim/media/videos/fractalsBY3B1B/1080p60/partial_movie_files/TestDiamondFractal/1672018281_3954914540_235106377.mp4'
+file 'file:C:/Users/Feynman/Documents/00课件-2023春-2023秋/GitGubStatus/JuliaSetinManim/media/videos/fractalsBY3B1B/1080p60/partial_movie_files/TestDiamondFractal/1672018281_387122659_235106377.mp4'

@@ -187,7 +187,7 @@ class Sierpinski(SelfSimilarFractal):
 class TestSierpinski(Scene):
     '''
         这是一份用来检测上面的Sierpinski类有没有出问题的一个Scene
-        结果显示非常正常
+        结果显示非常正常，当然也顺便爽渲染了一把谢尔宾斯基三角形
     '''
         # 定义一个函数，接受一个vgroup对象作为参数，并且使用这个vgroup进行迭代操作
     def sierpinsk_ita(self, vgroup):#函数默认应该加上一个self函数
@@ -237,6 +237,42 @@ class DiamondFractal(SelfSimilarFractal):
         for part, vect in zip(subparts, compass_directions(start_vect=UP + RIGHT)):
             part.next_to(ORIGIN, vect, buff=0)
         VGroup(*subparts).rotate(np.pi / 4, about_point=ORIGIN)
+
+class TestDiamondFractal(Scene):
+    '''
+        没错，这个测试代码是按照上面的谢尔宾斯基三角形的测试代码改过来的
+        渲染时间较长，稍安勿躁
+    '''
+        # 定义一个函数，接受一个vgroup对象作为参数
+    def diamond_ita(self, vgroup):#函数默认应该加上一个self函数
+        # 将原先的vgroup复制四份，装入列表中
+        var = [vgroup.copy() for i in range(4)]
+        # 把四个迭代的vgroup的位置放到位
+        DiamondFractal().arrange_subparts(*var)#这时候就把四个四边形的位置放到位了
+        #不需要设置任何的原函数参数返回
+        # 把原先的列表转化为VGroup，不然的话不好调用后面的move_to和scale等方法
+        diamondstage = VGroup()
+        diamondstage.add(*var)
+        # 把VGroup移动到原点
+        diamondstage.move_to(ORIGIN)
+        # 返回VGroup对象
+        return diamondstage
+
+    def construct(self):
+
+        diamondstage = VGroup()
+        diamondstage.add(DiamondFractal().get_seed_shape())#得到种子图像
+        diamondstage.set_opacity(0.5).set_color([RED, YELLOW, BLUE])#顺便调整种子图像的透明度与颜色
+        
+
+        #调用diamond_ita开始迭代
+        #不写一整个循环的主要原因是要手动调整四边形的大小，，，
+        #如果一直只缩放0.65倍的话，后面迭代的话就会超出屏幕
+        for i in range(3):
+            self.play(Transform(diamondstage, self.diamond_ita(diamondstage).scale(0.65)))
+        for i in range(3):
+            self.play(Transform(diamondstage, self.diamond_ita(diamondstage).scale(0.45)))      
+
 
 
 class PentagonalFractal(SelfSimilarFractal):
