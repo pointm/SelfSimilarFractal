@@ -1,0 +1,7 @@
+# This file is used internally by FFMPEG.
+file 'file:C:/Users/Feynman/Documents/00课件-2023春-2023秋/GitGubStatus/JuliaSetinManim/media/videos/fractalsBY3B1B/1080p60/partial_movie_files/TestSierpinski/1413466013_3669271916_235106377.mp4'
+file 'file:C:/Users/Feynman/Documents/00课件-2023春-2023秋/GitGubStatus/JuliaSetinManim/media/videos/fractalsBY3B1B/1080p60/partial_movie_files/TestSierpinski/1672018281_1524509963_235106377.mp4'
+file 'file:C:/Users/Feynman/Documents/00课件-2023春-2023秋/GitGubStatus/JuliaSetinManim/media/videos/fractalsBY3B1B/1080p60/partial_movie_files/TestSierpinski/1672018281_998377587_235106377.mp4'
+file 'file:C:/Users/Feynman/Documents/00课件-2023春-2023秋/GitGubStatus/JuliaSetinManim/media/videos/fractalsBY3B1B/1080p60/partial_movie_files/TestSierpinski/1672018281_1033168695_235106377.mp4'
+file 'file:C:/Users/Feynman/Documents/00课件-2023春-2023秋/GitGubStatus/JuliaSetinManim/media/videos/fractalsBY3B1B/1080p60/partial_movie_files/TestSierpinski/1672018281_362553195_235106377.mp4'
+file 'file:C:/Users/Feynman/Documents/00课件-2023春-2023秋/GitGubStatus/JuliaSetinManim/media/videos/fractalsBY3B1B/1080p60/partial_movie_files/TestSierpinski/1672018281_3250293874_235106377.mp4'

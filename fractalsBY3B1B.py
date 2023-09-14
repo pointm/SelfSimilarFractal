@@ -183,21 +183,45 @@ class Sierpinski(SelfSimilarFractal):
         tri1.move_to(tri2.get_corner(DOWN + LEFT), UP)
         tri3.move_to(tri2.get_corner(DOWN + RIGHT), UP)
 
+
 class TestSierpinski(Scene):
     '''
         这是一份用来检测上面的Sierpinski类有没有出问题的一个Scene
         结果显示非常正常
     '''
+        # 定义一个函数，接受一个vgroup对象作为参数，并且使用这个vgroup进行迭代操作
+    def sierpinsk_ita(self, vgroup):#函数默认应该加上一个self函数
+        # 将原先的vgroup复制三份，装入列表中
+        # 不一直使用VGroup一是因为不太熟悉VGroup的遍历操作
+        # 二是因为VGroupe().add是不准add自己的，如果要复制三份的话要使用copy()
+        # 但是copy()了的话，arrange_subparts只能接受三个参数，copy()了参数个数超标就不能
+        # 正常迭代了
+        var = [vgroup.copy() for i in range(3)]
+        # 把三个迭代的vgroup的位置放到位
+        Sierpinski().arrange_subparts(*var)#这时候就把三个三角形的位置放到位了
+        #不需要设置任何的原函数参数返回
+        # 把原先的列表转化为VGroup，不然的话列表不好调用后面的move_to和scale等方法
+        sierpinskistage = VGroup()
+        sierpinskistage.add(*var)
+        # 把VGroup移动到原点
+        sierpinskistage.move_to(ORIGIN)
+        # 返回VGroup对象
+        return sierpinskistage
+
     def construct(self):
-        pla = NumberPlane()
-        self.add(pla)
 
         sierpinskistage = VGroup()
-        sierpinskistage.add(*[Sierpinski().get_seed_shape() for i in range(3)])#得到三份种子图像
-        Sierpinski().arrange_subparts(*sierpinskistage)#这时候就把三个三角形的位置放到位了
-        #不需要设置任何的原函数参数返回
+        sierpinskistage.add(Sierpinski().get_seed_shape())#得到种子图像
+        sierpinskistage.set_opacity(0.5).set_color(BLUE_A)#顺便调整种子图像的透明度与颜色
         
-        self.add(sierpinskistage)
+
+        #调用sierpinsk_ita开始迭代
+        #不写一整个循环的主要原因是要手动调整三角形的大小，，，
+        #如果一直只缩放0.75倍的话，后面迭代的话就会超出屏幕
+        for i in range(3):
+            self.play(Transform(sierpinskistage, self.sierpinsk_ita(sierpinskistage).scale(0.75)))
+        for i in range(3):
+            self.play(Transform(sierpinskistage, self.sierpinsk_ita(sierpinskistage).scale(0.55)))
 
 
 class DiamondFractal(SelfSimilarFractal):
