@@ -97,7 +97,7 @@ class TestSierpinski(Scene):
 
         sierpinskistage = VGroup()
         sierpinskistage.add(Sierpinski().get_seed_shape())#得到种子图像
-        sierpinskistage.set_opacity(0.5).set_color(BLUE_A)#顺便调整种子图像的透明度与颜色
+        sierpinskistage.set_opacity(0.5).set_color([RED, YELLOW, BLUE])#顺便调整种子图像的透明度与颜色
         
 
         #调用sierpinsk_ita开始迭代
