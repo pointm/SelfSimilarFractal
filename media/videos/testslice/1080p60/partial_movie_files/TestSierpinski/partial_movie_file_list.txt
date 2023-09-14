@@ -1,0 +1,7 @@
+# This file is used internally by FFMPEG.
+file 'file:C:/Users/Feynman/Documents/00课件-2023春-2023秋/GitGubStatus/JuliaSetinManim/media/videos/testslice/1080p60/partial_movie_files/TestSierpinski/2902699114_3669271916_235106377.mp4'
+file 'file:C:/Users/Feynman/Documents/00课件-2023春-2023秋/GitGubStatus/JuliaSetinManim/media/videos/testslice/1080p60/partial_movie_files/TestSierpinski/3931933789_1524509963_235106377.mp4'
+file 'file:C:/Users/Feynman/Documents/00课件-2023春-2023秋/GitGubStatus/JuliaSetinManim/media/videos/testslice/1080p60/partial_movie_files/TestSierpinski/3931933789_998377587_235106377.mp4'
+file 'file:C:/Users/Feynman/Documents/00课件-2023春-2023秋/GitGubStatus/JuliaSetinManim/media/videos/testslice/1080p60/partial_movie_files/TestSierpinski/3931933789_1033168695_235106377.mp4'
+file 'file:C:/Users/Feynman/Documents/00课件-2023春-2023秋/GitGubStatus/JuliaSetinManim/media/videos/testslice/1080p60/partial_movie_files/TestSierpinski/3931933789_362553195_235106377.mp4'
+file 'file:C:/Users/Feynman/Documents/00课件-2023春-2023秋/GitGubStatus/JuliaSetinManim/media/videos/testslice/1080p60/partial_movie_files/TestSierpinski/3931933789_3250293874_235106377.mp4'
