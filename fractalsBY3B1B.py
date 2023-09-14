@@ -209,19 +209,36 @@ class TestSierpinski(Scene):
         return sierpinskistage
 
     def construct(self):
-
         sierpinskistage = VGroup()
         sierpinskistage.add(Sierpinski().get_seed_shape())#得到种子图像
         sierpinskistage.set_opacity(0.5).set_color([RED, YELLOW, BLUE])#顺便调整种子图像的透明度与颜色
         
-
-        #调用sierpinsk_ita开始迭代
-        #不写一整个循环的主要原因是要手动调整三角形的大小，，，
-        #如果一直只缩放0.75倍的话，后面迭代的话就会超出屏幕
+        # 调用sierpinsk_ita开始迭代
+        # 不写一整个循环的主要原因是要手动调整三角形的大小，，，
+        # 如果一直只缩放0.75倍的话，后面迭代的话就会超出屏幕
         for i in range(3):
             self.play(Transform(sierpinskistage, self.sierpinsk_ita(sierpinskistage).scale(0.75)))
         for i in range(3):
             self.play(Transform(sierpinskistage, self.sierpinsk_ita(sierpinskistage).scale(0.55)))
+
+
+class RenderCover(Scene):
+    ''' 
+    这个是用来渲染封面的
+    '''
+    def construct(self):
+        text = Text('Sierpinski Carpet', weight=BOLD, font_size=40)
+        text.move_to(DOWN * 3.75)
+
+        var = Sierpinski().get_seed_shape()
+        var.set_opacity(0.55).set_color([RED, YELLOW, BLUE])
+        sierpinski = VGroup().add(var)
+
+        for i in range(3):
+            sierpinski = TestSierpinski.sierpinsk_ita(self, sierpinski).scale(0.8)
+        sierpinski.move_to(UP*0.15)
+
+        self.add(sierpinski, text)
 
 
 class DiamondFractal(SelfSimilarFractal):
