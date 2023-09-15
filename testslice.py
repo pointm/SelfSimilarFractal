@@ -264,8 +264,31 @@ class HilbertCurve(SelfSimilarSpaceFillingCurve):
         str(RIGHT + DOWN): RIGHT + DOWN,
     }
 
+class PeanoCurve(SelfSimilarSpaceFillingCurve):
+    colors = [PURPLE, TEAL]
+    offsets = [
+        LEFT + DOWN,
+        LEFT,
+        LEFT + UP,
+        UP,
+        ORIGIN,
+        DOWN,
+        RIGHT + DOWN,
+        RIGHT,
+        RIGHT + UP,
+    ]
+    offset_to_rotation_axis = {
+        str(LEFT): UP,
+        str(UP): RIGHT,
+        str(ORIGIN): LEFT + UP,
+        str(DOWN): RIGHT,
+        str(RIGHT): UP,
+    }
+    scale_factor = 3
+    radius_scale_factor = 2.0 / 3
 
-class TestSlice(Scene):
+
+class TestHilbertCurve(Scene):
     def construct(self):
         hilbert_curve = HilbertCurve()
 
@@ -280,3 +303,18 @@ class TestSlice(Scene):
             self.play(Create(hilbert_curve), run_time=i+1)
             self.wait()
             hilbert_group.append(hilbert_curve)
+
+class TestPeanoCurve(Scene):
+    def construct(self):
+        hilbert_curve = PeanoCurve()
+
+        num = 4
+
+        for i in range(num):
+            hilbert_curve.order = i + 1
+            points = hilbert_curve.get_anchor_points()
+            hilbert_curve.set_points_as_corners(points)
+            hilbert_curve.set_color([RED, GREEN])
+            self.play(Create(hilbert_curve), run_time=i+1)
+            self.wait()
+          
