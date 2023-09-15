@@ -23,6 +23,35 @@ def rotate(points, angle=np.pi, axis=OUT):
     points = np.dot(points, np.transpose(matrix))
     return points
 
+class JaggedCurvePiece(VMobject):
+    """
+    类 JaggedCurvePiece是 VMobject 的子类。
+
+    这其中有一个方法insert_n_curves
+    - 如果曲线片段没有任何曲线，就设置它的点为一个零向量。
+    - 获取曲线片段的锚点，即每个曲线的起点和终点。
+    - 在锚点数组中，根据 n 的值，均匀地选取 n + len(anchors) 个索引。
+    - 用选取的锚点作为新的角点，重新设置曲线片段的点。
+
+    这样，就可以在原来的曲线片段中插入 n 个新的曲线，使得曲线片段看起来更加锯齿化。
+    """
+
+    def insert_n_curves(self, n):
+        if self.get_num_curves() == 0:
+            self.set_points(np.zeros((1, 3)))  # 没有点的话就返回一个0向量
+        anchors = self.get_anchors()
+        indices = np.linspace(0, len(anchors) - 1, n + len(anchors)).astype("int")
+        self.set_points_as_corners(anchors[indices])
+        """set_points_as_corners的意思是：
+            - 给定一个点的数组，把它们设置为VMobject的角点。
+            - 为了实现这个目的，这个算法会调整每个曲线的控制点，使得它们与锚点对齐，从而使得结果的贝塞尔曲线就是两个锚点之间的线段。
+            - 参数是一个点的数组，它们会被设置为角点。
+            - 返回值是自身，也就是VMobject对象。
+
+                简单地说，类里面的insert_n_curves这个方法可以把一个曲线变得更加锯齿化
+            """
+
+
 
 class FractalCurve(VMobject):
     """
@@ -138,17 +167,41 @@ class LindenmayerCurve(FractalCurve):
         return np.array(result) - center_of_mass(result)
 
 
+class FlowSnake(LindenmayerCurve):
 
-class TestLindenmayerCurve(Scene):
+    """
+        这段代码定义了一个FlowSnake类，它是LindenmayerCurve类的子类。FlowSnake类用来生成一种叫做流蛇曲线的分形曲线，它有以下的属性和方法：
+
+    - colors: 一个列表，表示曲线的颜色，可以是两种或者多种颜色。
+    - axiom: 一个字符串，表示曲线的初始状态。
+    - rule: 一个字典，表示曲线的生成规则，键是符号，值是替换后的字符串。
+    - radius: 一个数字，表示曲线的半径。
+    - scale_factor: 一个数字，表示曲线的缩放因子，这里是根号7。
+    - start_step: 一个向量，表示曲线的初始方向，这里是右方。
+    - angle: 一个数字，表示曲线的转角，这里是-1/3 * PI。
+
+    - __init__(self, **kwargs): 一个方法，接受一些关键字参数作为输入，
+    然后调用LindenmayerCurve类的构造函数来初始化对象。最后，根据曲线的阶数和旋转角度来旋转曲线，使其居中显示。
+    """
+
+    colors = [YELLOW, GREEN]
+    axiom = "A"
+    rule = {
+        "A": "A-B--B+A++AA+B-",
+        "B": "+A-BB--B-A++A+B",
+    }
+    radius = 6  # TODO, this is innaccurate
+    scale_factor = np.sqrt(7)
+    start_step = RIGHT
+    angle = -np.pi / 3
+
+    def __init__(self, **kwargs):
+        LindenmayerCurve.__init__(self, **kwargs)
+        self.rotate(-self.order * np.pi / 9, about_point=ORIGIN)
+
+
+class TestFlowSnake(Scene):
     def construct(self):
-
-        curve = LindenmayerCurve()
-        line = Line(*curve.get_anchor_points())
-        self.add(line)
-
-
-
-
-curve = LindenmayerCurve()
-
-print(curve.get_anchor_points())
+        var = Line()
+        curve = FlowSnake()
+        self.play(Create(curve))
