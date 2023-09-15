@@ -23,6 +23,7 @@ def rotate(points, angle=np.pi, axis=OUT):
     points = np.dot(points, np.transpose(matrix))
     return points
 
+
 class JaggedCurvePiece(VMobject):
     """
     类 JaggedCurvePiece是 VMobject 的子类。
@@ -50,7 +51,6 @@ class JaggedCurvePiece(VMobject):
 
                 简单地说，类里面的insert_n_curves这个方法可以把一个曲线变得更加锯齿化
             """
-
 
 
 class FractalCurve(VMobject):
@@ -108,100 +108,56 @@ class FractalCurve(VMobject):
         raise Exception("Not implemented")
 
 
-class LindenmayerCurve(FractalCurve):
-    """
-        这段代码定义了一个类 LindenmayerCurve，它是 FractalCurve 的子类。
-        LindenmayerCurve 类的作用是创建一个利用 L-系统（Lindenmayer system）生成的分形曲线，它有以下的属性和方法：
-
-    - axiom：L-系统的公理，是一个字符串。公理是 L-系统的初始状态，它由一些字母组成，每个字母代表一个命令。
-    - rule：L-系统的规则，是一个字典。规则是 L-系统的转换方式，它表示每个字母在下一步应该被替换成什么字符串。
-    - scale_factor：分形曲线的缩放因子，是一个数值，默认为 2。这个数值表示每个子对象相对于原对象的缩放比例。
-    - radius：分形曲线的半径，是一个数值，默认为 3。这个数值表示分形曲线的初始长度。
-    - start_step：分形曲线的起始方向，是一个向量，默认为 RIGHT。这个向量表示分形曲线的第一段线段的方向。
-    - angle：分形曲线的转角，是一个弧度值，默认为 pi/2。这个弧度值表示分形曲线在遇到 "+" 或 "-" 命令时应该旋转的角度。
-    - expand_command_string：扩展命令字符串，是一个方法。这个方法接受一个命令字符串作为参数，返回一个扩展后的命令字符串。
-    扩展的方式是对每个字母根据规则进行替换，如果没有对应的规则，就保留原字母。
-    - get_command_string：获取命令字符串，是一个方法。
-    这个方法根据 order 的值循环调用 expand_command_string 方法，得到最终的命令字符串。
-    - get_anchor_points：获取分形曲线的角点，是一个方法。
-    这个方法根据命令字符串和其他属性计算分形曲线的角点。计算的方式是从原点开始，根据起始方向和半径确定第一段线段的终点，并加入结果数组。
-    然后对每个命令进行判断，如果是 "+" 或 "-"，就根据转角旋转当前方向；如果是其他字母，就沿着当前方向前进一段距离，并加入结果数组。
-    最后返回结果数组减去它们的质心。:smile:
-    """
-
-    axiom = "A"
-    rule = {}
+class SelfSimilarSpaceFillingCurve(FractalCurve):
+    offsets = []
+    # keys must awkwardly be in string form...
+    offset_to_rotation_axis = {}
     scale_factor = 2
-    radius = 3
-    start_step = RIGHT
-    angle = np.pi / 2
+    radius_scale_factor = 0.5
 
-    def expand_command_string(self, command):
-        result = ""
-        for letter in command:
-            if letter in self.rule:
-                result += self.rule[letter]
-            else:
-                result += letter
-        return result
+    def transform(self, points, offset):
+        """
+        How to transform the copy of points shifted by
+        offset.  Generally meant to be extended in subclasses
+        """
+        copy = np.array(points)
+        if str(offset) in self.offset_to_rotation_axis:
+            copy = rotate(copy, axis=self.offset_to_rotation_axis[str(offset)])
+        copy /= (self.scale_factor,)
+        copy += offset * self.radius * self.radius_scale_factor
+        return copy
 
-    def get_command_string(self):
-        result = self.axiom
-        for x in range(self.order):
-            result = self.expand_command_string(result)
-        return result
+    def refine_into_subparts(self, points):
+        transformed_copies = [self.transform(points, offset) for offset in self.offsets]
+        return reduce(lambda a, b: np.append(a, b, axis=0), transformed_copies)
 
     def get_anchor_points(self):
-        step = float(self.radius) * self.start_step
-        step /= self.scale_factor**self.order
-        curr = np.zeros(3)
-        result = [curr]
-        for letter in self.get_command_string():
-            if letter == "+":
-                step = rotate(step, self.angle)
-            elif letter == "-":
-                step = rotate(step, -self.angle)
-            else:
-                curr = curr + step
-                result.append(curr)
-        return np.array(result) - center_of_mass(result)
+        points = np.zeros((1, 3))
+        for count in range(self.order):
+            points = self.refine_into_subparts(points)
+        return points
+
+    def generate_grid(self):
+        raise Exception("Not implemented")
 
 
-class FlowSnake(LindenmayerCurve):
-
-    """
-        这段代码定义了一个FlowSnake类，它是LindenmayerCurve类的子类。FlowSnake类用来生成一种叫做流蛇曲线的分形曲线，它有以下的属性和方法：
-
-    - colors: 一个列表，表示曲线的颜色，可以是两种或者多种颜色。
-    - axiom: 一个字符串，表示曲线的初始状态。
-    - rule: 一个字典，表示曲线的生成规则，键是符号，值是替换后的字符串。
-    - radius: 一个数字，表示曲线的半径。
-    - scale_factor: 一个数字，表示曲线的缩放因子，这里是根号7。
-    - start_step: 一个向量，表示曲线的初始方向，这里是右方。
-    - angle: 一个数字，表示曲线的转角，这里是-1/3 * PI。
-
-    - __init__(self, **kwargs): 一个方法，接受一些关键字参数作为输入，
-    然后调用LindenmayerCurve类的构造函数来初始化对象。最后，根据曲线的阶数和旋转角度来旋转曲线，使其居中显示。
-    """
-
-    colors = [YELLOW, GREEN]
-    axiom = "A"
-    rule = {
-        "A": "A-B--B+A++AA+B-",
-        "B": "+A-BB--B-A++A+B",
+class HilbertCurve(SelfSimilarSpaceFillingCurve):
+    offsets = [
+        LEFT + DOWN,
+        LEFT + UP,
+        RIGHT + UP,
+        RIGHT + DOWN,
+    ]
+    offset_to_rotation_axis = {
+        str(LEFT + DOWN): RIGHT + UP,
+        str(RIGHT + DOWN): RIGHT + DOWN,
     }
-    radius = 6  # TODO, this is innaccurate
-    scale_factor = np.sqrt(7)
-    start_step = RIGHT
-    angle = -np.pi / 3
-
-    def __init__(self, **kwargs):
-        LindenmayerCurve.__init__(self, **kwargs)
-        self.rotate(-self.order * np.pi / 9, about_point=ORIGIN)
 
 
-class TestFlowSnake(Scene):
+class TestSlice(Scene):
     def construct(self):
-        var = Line()
-        curve = FlowSnake()
-        self.play(Create(curve))
+        pla = NumberPlane()
+        self.add(pla)
+
+
+        return super().construct()
