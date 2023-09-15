@@ -317,4 +317,16 @@ class TestPeanoCurve(Scene):
             hilbert_curve.set_color([RED, GREEN])
             self.play(Create(hilbert_curve), run_time=i+1)
             self.wait()
+
+class RenderCover2(Scene):
+    def construct(self):
+        peano_curve = PeanoCurve()
+        peano_curve.order = 3
+
+        points = peano_curve.get_anchor_points()
+        peano_curve.set_points_as_corners(points)
+        peano_curve.set_color([RED, YELLOW])
+
+        self.add(peano_curve)
+
           
