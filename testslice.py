@@ -1,3 +1,4 @@
+from time import sleep
 from manim import *
 from functools import reduce
 import random
@@ -14,7 +15,6 @@ from manim import *
 #         vmob.set_points_as_corners([UP, RIGHT, DOWN, LEFT, UP])
 #         # 将 VMobject 添加到场景中
 #         self.play(Create(vmob))
-
 
 
 def rotate(points, angle=np.pi, axis=OUT):
@@ -48,6 +48,17 @@ class JaggedCurvePiece(VMobject):
     - 用选取的锚点作为新的角点，重新设置曲线片段的点。
 
     这样，就可以在原来的曲线片段中插入 n 个新的曲线，使得曲线片段看起来更加锯齿化。
+
+    这段代码定义了一个名为JaggedCurvePiece的类，它是VMobject的子类。这个类有一个方法insert_n_curves，
+    其功能是在曲线片段中插入新的曲线，使其看起来更加锯齿化。
+    insert_n_curves方法的功能如下：
+
+    如果曲线片段没有任何曲线（即get_num_curves()返回0），它将会设置曲线片段的点为一个零向量（即set_points(np.zeros((1, 3)))）。
+    它获取曲线片段的锚点（即每个曲线的起点和终点），这些锚点存储在anchors数组中。
+    然后，根据给定的n值和anchors数组的长度，它均匀地选取n + len(anchors)个索引（使用np.linspace函数实现）。
+    最后，它用选取的锚点作为新的角点，重新设置曲线片段的点（即set_points_as_corners(anchors[indices])）。
+
+    总的来说，这个方法通过在原始曲线片段中插入新的曲线，使得曲线片段看起来更加锯齿化。
     """
 
     def insert_n_curves(self, n):
@@ -170,12 +181,15 @@ class HilbertCurve(SelfSimilarSpaceFillingCurve):
 class TestSlice(Scene):
     def construct(self):
         # 创建一个圆形的曲线片段
-        curve = JaggedCurvePiece()
-        curve.set_points_as_corners([UP*2, LEFT, DOWN, RIGHT, ORIGIN])
+        curve = HilbertCurve()
+        self.add(curve.move_to(ORIGIN))
         # 在曲线片段中插入 4 个新的曲线
-        c1 = curve.insert_n_curves(6)
-        c2 = curve.insert_n_curves(3)
-        self.add(curve)
+
         # for i in range(4):
-        self.play(Transform(c2, c1))
-        
+
+
+curve = HilbertCurve()
+la = curve.get_anchor_points()
+print(la)
+
+sleep(100)
