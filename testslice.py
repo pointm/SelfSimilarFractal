@@ -182,14 +182,16 @@ class TestSlice(Scene):
     def construct(self):
         # 创建一个圆形的曲线片段
         curve = HilbertCurve()
-        self.add(curve.move_to(ORIGIN))
+        dots = VGroup()
+        la = curve.get_anchor_points()
+        for i in la:
+            dots.add(Dot().move_to(i))
+
+
+
+        self.add(dots)
         # 在曲线片段中插入 4 个新的曲线
 
         # for i in range(4):
 
 
-curve = HilbertCurve()
-la = curve.get_anchor_points()
-print(la)
-
-sleep(100)
