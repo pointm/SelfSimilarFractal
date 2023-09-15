@@ -572,7 +572,7 @@ class FractalCurve(VMobject):
     }
 
     def init_points(self):
-        points = self.get_anchor_points()
+        points = self.get_anchors()
         self.set_points_as_corners(points)
         if not self.monochromatic:
             alphas = np.linspace(0, 1, self.num_submobjects)

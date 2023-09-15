@@ -6,14 +6,14 @@ import itertools as it
 
 from manim import *
 
-class SquareExample(Scene):
-    def construct(self):
-        # 创建一个 VMobject
-        vmob = VMobject()
-        # 将四个点设置为角点，形成一个正方形
-        vmob.set_points_as_corners([UP, RIGHT, DOWN, LEFT, UP])
-        # 将 VMobject 添加到场景中
-        self.play(Create(vmob))
+# class SquareExample(Scene):
+#     def construct(self):
+#         # 创建一个 VMobject
+#         vmob = VMobject()
+#         # 将四个点设置为角点，形成一个正方形
+#         vmob.set_points_as_corners([UP, RIGHT, DOWN, LEFT, UP])
+#         # 将 VMobject 添加到场景中
+#         self.play(Create(vmob))
 
 
 
