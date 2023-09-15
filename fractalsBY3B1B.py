@@ -201,12 +201,12 @@ class TestSierpinski(Scene):
         Sierpinski().arrange_subparts(*var)#这时候就把三个三角形的位置放到位了
         #不需要设置任何的原函数参数返回
         # 把原先的列表转化为VGroup，不然的话列表不好调用后面的move_to和scale等方法
-        sierpinskistage = VGroup()
-        sierpinskistage.add(*var)
+        vgroup = VGroup()
+        vgroup.add(*var)
         # 把VGroup移动到原点
-        sierpinskistage.move_to(ORIGIN)
+        vgroup.move_to(ORIGIN)
         # 返回VGroup对象
-        return sierpinskistage
+        return vgroup
 
     def construct(self):
         sierpinskistage = VGroup()
@@ -268,12 +268,12 @@ class TestDiamondFractal(Scene):
         DiamondFractal().arrange_subparts(*var)#这时候就把四个四边形的位置放到位了
         #不需要设置任何的原函数参数返回
         # 把原先的列表转化为VGroup，不然的话不好调用后面的move_to和scale等方法
-        diamondstage = VGroup()
-        diamondstage.add(*var)
+        vgroup = VGroup()
+        vgroup.add(*var)
         # 把VGroup移动到原点
-        diamondstage.move_to(ORIGIN)
+        vgroup.move_to(ORIGIN)
         # 返回VGroup对象
-        return diamondstage
+        return vgroup
 
     def construct(self):
 
@@ -304,6 +304,37 @@ class PentagonalFractal(SelfSimilarFractal):
         for x, part in enumerate(subparts):
             part.shift(0.95 * part.get_height() * UP)
             part.rotate(2 * np.pi * x / 5, about_point=ORIGIN)
+
+
+class TestPentagonal(Scene):
+    '''
+    测试五边形分型的可行性，，代码还是照抄上面的
+    '''
+     # 定义一个函数，接受一个vgroup对象作为参数
+    def pent_ita(self, vgroup, num):#函数默认应该加上一个self函数
+        # 将原先的vgroup复制四份，装入列表中
+        var = [vgroup.copy() for i in range(num)]
+        # 把四个迭代的vgroup的位置放到位
+        PentagonalFractal().arrange_subparts(*var)#这时候就把四个四边形的位置放到位了
+        #不需要设置任何的原函数参数返回
+        # 把原先的列表转化为VGroup，不然的话不好调用后面的move_to和scale等方法
+        vgroup = VGroup()
+        vgroup.add(*var)
+        # 把VGroup移动到原点
+        vgroup.move_to(ORIGIN)
+        # 返回VGroup对象
+        return vgroup
+    
+    def construct(self):
+        penstage = VGroup()
+        var = PentagonalFractal.get_seed_shape(self)
+        penstage.add(var)
+
+        
+        for i in range(3):
+            self.play(Transform(penstage, 
+                                TestPentagonal.pent_ita(self, penstage, 5)
+                                .scale(0.575)))
 
 
 class PentagonalPiCreatureFractal(PentagonalFractal):

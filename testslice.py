@@ -79,37 +79,60 @@ class DiamondFractal(SelfSimilarFractal):
             part.next_to(ORIGIN, vect, buff=0)
         VGroup(*subparts).rotate(np.pi / 4, about_point=ORIGIN)
 
+    def construct(self):
+        sierpinskistage = VGroup()
+        sierpinskistage.add(Sierpinski().get_seed_shape())#得到种子图像
+        sierpinskistage.set_opacity(0.5).set_color([RED, YELLOW, BLUE])#顺便调整种子图像的透明度与颜色
+        
+        # 调用sierpinsk_ita开始迭代
+        # 不写一整个循环的主要原因是要手动调整三角形的大小，，，
+        # 如果一直只缩放0.75倍的话，后面迭代的话就会超出屏幕
+        for i in range(3):
+            self.play(Transform(sierpinskistage, self.sierpinsk_ita(sierpinskistage).scale(0.75)))
+        for i in range(3):
+            self.play(Transform(sierpinskistage, self.sierpinsk_ita(sierpinskistage).scale(0.55)))
 
-class TestDiamondFractal(Scene):
-    '''
-        没错，这个测试代码是按照上面的谢尔宾斯基三角形的测试代码改过来的
-    '''
-        # 定义一个函数，接受一个vgroup对象作为参数
-    def diamond_ita(self, vgroup):#函数默认应该加上一个self函数
+
+class PentagonalFractal(SelfSimilarFractal):
+    num_subparts = 5
+    colors = [MAROON_B, YELLOW, RED]
+    height = 6
+
+    def get_seed_shape(self):
+        return RegularPolygon(n=5, start_angle=np.pi / 2)
+
+    def arrange_subparts(self, *subparts):
+        for x, part in enumerate(subparts):
+            part.shift(0.95 * part.get_height() * UP)
+            part.rotate(2 * np.pi * x / 5, about_point=ORIGIN)
+
+class TestPentagonal(Scene):
+     # 定义一个函数，接受一个vgroup对象作为参数
+    def pent_ita(self, vgroup, num):#函数默认应该加上一个self函数
         # 将原先的vgroup复制四份，装入列表中
-        var = [vgroup.copy() for i in range(4)]
+        var = [vgroup.copy() for i in range(num)]
         # 把四个迭代的vgroup的位置放到位
-        DiamondFractal().arrange_subparts(*var)#这时候就把四个四边形的位置放到位了
+        PentagonalFractal().arrange_subparts(*var)#这时候就把四个四边形的位置放到位了
         #不需要设置任何的原函数参数返回
         # 把原先的列表转化为VGroup，不然的话不好调用后面的move_to和scale等方法
-        diamondstage = VGroup()
-        diamondstage.add(*var)
+        vgroup = VGroup()
+        vgroup.add(*var)
         # 把VGroup移动到原点
-        diamondstage.move_to(ORIGIN)
+        vgroup.move_to(ORIGIN)
         # 返回VGroup对象
-        return diamondstage
-
+        return vgroup
+    
     def construct(self):
+        penstage = VGroup()
+        var = PentagonalFractal.get_seed_shape(self)
+        penstage.add(var)
 
-        diamondstage = VGroup()
-        diamondstage.add(DiamondFractal().get_seed_shape())#得到种子图像
-        diamondstage.set_opacity(0.5).set_color([RED, YELLOW, BLUE])#顺便调整种子图像的透明度与颜色
         
+        for i in range(3):
+            self.play(Transform(penstage, 
+                                TestPentagonal.pent_ita(self, penstage, 5)
+                                .scale(0.575)))
 
-        #调用diamond_ita开始迭代
-        #不写一整个循环的主要原因是要手动调整四边形的大小，，，
-        #如果一直只缩放0.65倍的话，后面迭代的话就会超出屏幕
-        for i in range(3):
-            self.play(Transform(diamondstage, self.diamond_ita(diamondstage).scale(0.65)))
-        for i in range(3):
-            self.play(Transform(diamondstage, self.diamond_ita(diamondstage).scale(0.45)))      
+
+
+        
