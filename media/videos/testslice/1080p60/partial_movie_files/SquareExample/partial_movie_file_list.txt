@@ -1,0 +1,2 @@
+# This file is used internally by FFMPEG.
+file 'file:C:/Users/PointM2001/Desktop/朝花夕拾/GitHubProjekt/JuliaSetinManim/media/videos/testslice/1080p60/partial_movie_files/SquareExample/1413466013_1174314030_223132457.mp4'

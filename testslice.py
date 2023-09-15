@@ -4,6 +4,19 @@ import random
 import itertools as it
 
 
+from manim import *
+
+class SquareExample(Scene):
+    def construct(self):
+        # 创建一个 VMobject
+        vmob = VMobject()
+        # 将四个点设置为角点，形成一个正方形
+        vmob.set_points_as_corners([UP, RIGHT, DOWN, LEFT, UP])
+        # 将 VMobject 添加到场景中
+        self.play(Create(vmob))
+
+
+
 def rotate(points, angle=np.pi, axis=OUT):
     """
     旋转函数
@@ -156,8 +169,13 @@ class HilbertCurve(SelfSimilarSpaceFillingCurve):
 
 class TestSlice(Scene):
     def construct(self):
-        pla = NumberPlane()
-        self.add(pla)
-
-
-        return super().construct()
+        # 创建一个圆形的曲线片段
+        curve = JaggedCurvePiece()
+        curve.set_points_as_corners([UP*2, LEFT, DOWN, RIGHT, ORIGIN])
+        # 在曲线片段中插入 4 个新的曲线
+        c1 = curve.insert_n_curves(6)
+        c2 = curve.insert_n_curves(3)
+        self.add(curve)
+        # for i in range(4):
+        self.play(Transform(c2, c1))
+        
