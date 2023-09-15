@@ -542,15 +542,22 @@ class FractalCurve(VMobject):
     """
         这段代码定义了一个类 FractalCurve，它是 VMobject 的子类。FractalCurve 类的作用是创建一个分形曲线，它有以下的属性和方法：
 
-    - radius：分形曲线的半径，是一个数值，默认为 3。
-    - order：分形曲线的阶数，是一个整数，默认为 5。阶数越高，分形曲线越复杂。
-    - colors：分形曲线的颜色，是一个颜色列表，默认为 [RED, GREEN]。分形曲线会根据这个列表生成一个渐变色。
-    - num_submobjects：分形曲线的子对象数量，是一个整数，默认为 20。子对象是指分形曲线中的每一段锯齿形的曲线片段，它们是 JaggedCurvePiece 类的实例。
-    - monochromatic：分形曲线是否为单色，是一个布尔值，默认为 False。如果为 True，分形曲线不会使用渐变色，而是使用 VMobject 的默认颜色。
-    - order_to_stroke_width_map：分形曲线的阶数和描边宽度的映射，是一个字典，默认为 {3: 3, 4: 2, 5: 1}。这个字典表示不同阶数的分形曲线应该使用的描边宽度，如果阶数超过字典中的最大键值，就使用最大键值对应的描边宽度。
-    - init_points：初始化分形曲线的点，是一个方法。这个方法会调用 get_anchor_points 方法获取分形曲线的角点，然后调用 set_points_as_corners 方法把角点设置为 VMobject 的角点。如果 monochromatic 为 False，这个方法还会根据 num_submobjects 的值，在分形曲线中插入相应数量的子对象，并把 VMobject 的点设置为空数组。
-    - init_colors：初始化分形曲线的颜色，是一个方法。这个方法会调用 VMobject 的 init_colors 方法，并根据 colors 的值设置分形曲线的渐变色。然后根据 order 和 order_to_stroke_width_map 的值设置分形曲线的描边宽度。
-    - get_anchor_points：获取分形曲线的角点，是一个方法。这个方法没有实现，需要在子类中重写。
+        - radius：分形曲线的半径，是一个数值，默认为 3。
+        - order：分形曲线的阶数，是一个整数，默认为 5。阶数越高，分形曲线越复杂。
+        - colors：分形曲线的颜色，是一个颜色列表，默认为 [RED, GREEN]。分形曲线会根据这个列表生成一个渐变色。
+        - num_submobjects：分形曲线的子对象数量，是一个整数，默认为 20。
+        子对象是指分形曲线中的每一段锯齿形的曲线片段，它们是 JaggedCurvePiece 类的实例。
+        - monochromatic：分形曲线是否为单色，是一个布尔值，默认为 False。
+        如果为 True，分形曲线不会使用渐变色，而是使用 VMobject 的默认颜色。
+        - order_to_stroke_width_map：分形曲线的阶数和描边宽度的映射，是一个字典，默认为 {3: 3, 4: 2, 5: 1}。
+        这个字典表示不同阶数的分形曲线应该使用的描边宽度，如果阶数超过字典中的最大键值，就使用最大键值对应的描边宽度。
+        - init_points：初始化分形曲线的点，是一个方法。
+        这个方法会调用 get_anchor_points 方法获取分形曲线的角点，然后调用 set_points_as_corners 
+        方法把角点设置为 VMobject 的角点。
+        
+        - init_colors：初始化分形曲线的颜色，是一个方法。这个方法会调用 VMobject 的 init_colors 方法，
+        并根据 colors 的值设置分形曲线的渐变色。然后根据 order 和 order_to_stroke_width_map 的值设置分形曲线的描边宽度。
+        - get_anchor_points：获取分形曲线的角点，是一个方法。这个方法没有实现，需要在子类中重写。
     """
 
     radius = 3
