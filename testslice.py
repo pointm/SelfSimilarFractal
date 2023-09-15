@@ -3,6 +3,33 @@ from functools import reduce
 import random
 import itertools as it
 
+def selfsimilarfractal_iteration(vgroup, num, classname):
+        '''
+            这是一个针对SelfSimilarFractal的子类的分型方法
+            它的作用是将传入的原先的图像vgroup复制num份，然后将这些份分别按照
+            传入的classname().arrange_subparts方法来进行位置排列
+            并且传出一个VGroup类型的变量，这个变量里面包含的图形已经被处理好了
+            其中的子部份已经被排列到正确的位置上。如果相对某个分型进行进一步的迭代的话，反复调用这个函数就好
+            为什么不把这个方法写在3B1B的SelfSimilarFractal父类里面？因为我是懒狗不想改别人的代码
+        '''
+        #classname仅限于
+    # SelfSimilarFractal子类的那些描述分型的类，因为只有他们有arrange_subparts方法
+        # 将原先的vgroup复制num份，装入列表中
+        var = [vgroup.copy() for i in range(num)]
+        # 把迭代的vgroup的位置放到位
+        classname().arrange_subparts(*var)#这时候就把子图像的的位置放到位了
+        #不需要设置任何的原函数参数返回
+        # 把原先的列表转化为VGroup，不然的话不好调用后面的move_to和scale等方法
+        vgroup = VGroup()
+        vgroup.add(*var)
+        # 把VGroup移动到原点
+        vgroup.move_to(ORIGIN)
+        # 返回VGroup对象，
+        # 最后不需要写一个东西接住这个返回值，因为原先传入的VGroup就是最后输出的这个VGroup
+        # 相当于原先传入的那个图形本身已经被迭代过了
+        return vgroup
+
+
 class SelfSimilarFractal(VMobject):
     '''
         这段代码是一个用于定义自相似分形图形的类，它继承了VMobject类，这是一个表示矢量图形对象的基类。它的属性和方法是：
@@ -93,45 +120,41 @@ class DiamondFractal(SelfSimilarFractal):
             self.play(Transform(sierpinskistage, self.sierpinsk_ita(sierpinskistage).scale(0.55)))
 
 
-class PentagonalFractal(SelfSimilarFractal):
-    num_subparts = 5
-    colors = [MAROON_B, YELLOW, RED]
-    height = 6
+class CircularFractal(SelfSimilarFractal):
+    num_subparts = 3
+    colors = [GREEN, BLUE, GREY]
 
     def get_seed_shape(self):
-        return RegularPolygon(n=5, start_angle=np.pi / 2)
+        return Circle()
 
     def arrange_subparts(self, *subparts):
-        for x, part in enumerate(subparts):
-            part.shift(0.95 * part.get_height() * UP)
-            part.rotate(2 * np.pi * x / 5, about_point=ORIGIN)
+        if not hasattr(self, "been_here"):
+            self.num_subparts = 3 + self.order
+            self.been_here = True
+        for i, part in enumerate(subparts):
+            theta = np.pi / self.num_subparts
+            part.next_to(
+                ORIGIN, UP,
+                buff=self.height / (2 * np.tan(theta))
+            )
+            part.rotate(i * 2 * np.pi / self.num_subparts, about_point=ORIGIN)
+        self.num_subparts -= 1
 
-class TestPentagonal(Scene):
-     # 定义一个函数，接受一个vgroup对象作为参数
-    def pent_ita(self, vgroup, num):#函数默认应该加上一个self函数
-        # 将原先的vgroup复制四份，装入列表中
-        var = [vgroup.copy() for i in range(num)]
-        # 把四个迭代的vgroup的位置放到位
-        PentagonalFractal().arrange_subparts(*var)#这时候就把四个四边形的位置放到位了
-        #不需要设置任何的原函数参数返回
-        # 把原先的列表转化为VGroup，不然的话不好调用后面的move_to和scale等方法
-        vgroup = VGroup()
-        vgroup.add(*var)
-        # 把VGroup移动到原点
-        vgroup.move_to(ORIGIN)
-        # 返回VGroup对象
-        return vgroup
-    
+
+class TestCircular(Scene):
+
     def construct(self):
         penstage = VGroup()
-        var = PentagonalFractal.get_seed_shape(self)
+        var = CircularFractal.get_seed_shape(self)
         penstage.add(var)
 
-        
-        for i in range(3):
+        for i in range(6):
             self.play(Transform(penstage, 
-                                TestPentagonal.pent_ita(self, penstage, 5)
-                                .scale(0.575)))
+                                selfsimilarfractal_iteration(penstage, 3, CircularFractal)
+                                .scale(0.5)))
+            
+
+
 
 
 

@@ -110,6 +110,32 @@ def fractalification_iteration(vmobject, dimension=1.05, num_inserted_anchors_ra
     ])
     return vmobject
 
+def selfsimilarfractal_iteration(vgroup, num, classname):
+        '''
+            这是一个针对SelfSimilarFractal的子类的分型方法
+            它的作用是将传入的原先的图像vgroup复制num份，然后将这些份分别按照
+            传入的classname().arrange_subparts方法来进行位置排列
+            并且传出一个VGroup类型的变量，这个变量里面包含的图形已经被处理好了
+            其中的子部份已经被排列到正确的位置上。如果相对某个分型进行进一步的迭代的话，反复调用这个函数就好。
+            为什么不把这个方法写在3B1B的SelfSimilarFractal父类里面？因为我是懒狗不想改别人的代码
+        '''
+        # 再次强调classname仅限于
+        # SelfSimilarFractal的那些描述分型的子类，因为只有他们有arrange_subparts方法
+        # 父类SelfSimilarFractal的arrange_subparts是一个抽象方法
+        # 将原先的vgroup复制num份，装入列表中
+        var = [vgroup.copy() for i in range(num)]
+        # 把迭代的vgroup的位置放到位
+        classname().arrange_subparts(*var)#这时候就把子图像的的位置放到位了
+        #不需要设置任何的原函数参数返回
+        # 把原先的列表转化为VGroup，不然的话不好调用后面的move_to和scale等方法
+        vgroup = VGroup()
+        vgroup.add(*var)
+        # 把VGroup移动到原点
+        vgroup.move_to(ORIGIN)
+        # 返回VGroup对象
+        return vgroup
+
+
 class SelfSimilarFractal(VMobject):
     '''
         这段代码是一个用于定义自相似分形图形的类，它继承了VMobject类，这是一个表示矢量图形对象的基类。它的属性和方法是：
@@ -189,24 +215,6 @@ class TestSierpinski(Scene):
         这是一份用来检测上面的Sierpinski类有没有出问题的一个Scene
         结果显示非常正常，当然也顺便爽渲染了一把谢尔宾斯基三角形
     '''
-        # 定义一个函数，接受一个vgroup对象作为参数，并且使用这个vgroup进行迭代操作
-    def sierpinsk_ita(self, vgroup):#函数默认应该加上一个self函数
-        # 将原先的vgroup复制三份，装入列表中
-        # 不一直使用VGroup一是因为不太熟悉VGroup的遍历操作
-        # 二是因为VGroupe().add是不准add自己的，如果要复制三份的话要使用copy()
-        # 但是copy()了的话，arrange_subparts只能接受三个参数，copy()了参数个数超标就不能
-        # 正常迭代了
-        var = [vgroup.copy() for i in range(3)]
-        # 把三个迭代的vgroup的位置放到位
-        Sierpinski().arrange_subparts(*var)#这时候就把三个三角形的位置放到位了
-        #不需要设置任何的原函数参数返回
-        # 把原先的列表转化为VGroup，不然的话列表不好调用后面的move_to和scale等方法
-        vgroup = VGroup()
-        vgroup.add(*var)
-        # 把VGroup移动到原点
-        vgroup.move_to(ORIGIN)
-        # 返回VGroup对象
-        return vgroup
 
     def construct(self):
         sierpinskistage = VGroup()
@@ -217,9 +225,9 @@ class TestSierpinski(Scene):
         # 不写一整个循环的主要原因是要手动调整三角形的大小，，，
         # 如果一直只缩放0.75倍的话，后面迭代的话就会超出屏幕
         for i in range(3):
-            self.play(Transform(sierpinskistage, self.sierpinsk_ita(sierpinskistage).scale(0.75)))
+            self.play(Transform(sierpinskistage, selfsimilarfractal_iteration(sierpinskistage, 3, Sierpinski).scale(0.75)))
         for i in range(3):
-            self.play(Transform(sierpinskistage, self.sierpinsk_ita(sierpinskistage).scale(0.55)))
+            self.play(Transform(sierpinskistage, selfsimilarfractal_iteration(sierpinskistage, 3, Sierpinski).scale(0.55)))
 
 
 class RenderCover(Scene):
@@ -260,21 +268,6 @@ class TestDiamondFractal(Scene):
         没错，这个测试代码是按照上面的谢尔宾斯基三角形的测试代码改过来的
         渲染时间较长，稍安勿躁
     '''
-        # 定义一个函数，接受一个vgroup对象作为参数
-    def diamond_ita(self, vgroup):#函数默认应该加上一个self函数
-        # 将原先的vgroup复制四份，装入列表中
-        var = [vgroup.copy() for i in range(4)]
-        # 把四个迭代的vgroup的位置放到位
-        DiamondFractal().arrange_subparts(*var)#这时候就把四个四边形的位置放到位了
-        #不需要设置任何的原函数参数返回
-        # 把原先的列表转化为VGroup，不然的话不好调用后面的move_to和scale等方法
-        vgroup = VGroup()
-        vgroup.add(*var)
-        # 把VGroup移动到原点
-        vgroup.move_to(ORIGIN)
-        # 返回VGroup对象
-        return vgroup
-
     def construct(self):
 
         diamondstage = VGroup()
@@ -286,9 +279,9 @@ class TestDiamondFractal(Scene):
         #不写一整个循环的主要原因是要手动调整四边形的大小，，，
         #如果一直只缩放0.65倍的话，后面迭代的话就会超出屏幕
         for i in range(3):
-            self.play(Transform(diamondstage, self.diamond_ita(diamondstage).scale(0.65)))
+            self.play(Transform(diamondstage, selfsimilarfractal_iteration(diamondstage, 4, DiamondFractal).scale(0.65)))
         for i in range(3):
-            self.play(Transform(diamondstage, self.diamond_ita(diamondstage).scale(0.45)))      
+            self.play(Transform(diamondstage, selfsimilarfractal_iteration(diamondstage, 4, DiamondFractal).scale(0.45)))      
 
 
 
@@ -310,21 +303,7 @@ class TestPentagonal(Scene):
     '''
     测试五边形分型的可行性，，代码还是照抄上面的
     '''
-     # 定义一个函数，接受一个vgroup对象作为参数
-    def pent_ita(self, vgroup, num):#函数默认应该加上一个self函数
-        # 将原先的vgroup复制四份，装入列表中
-        var = [vgroup.copy() for i in range(num)]
-        # 把四个迭代的vgroup的位置放到位
-        PentagonalFractal().arrange_subparts(*var)#这时候就把四个四边形的位置放到位了
-        #不需要设置任何的原函数参数返回
-        # 把原先的列表转化为VGroup，不然的话不好调用后面的move_to和scale等方法
-        vgroup = VGroup()
-        vgroup.add(*var)
-        # 把VGroup移动到原点
-        vgroup.move_to(ORIGIN)
-        # 返回VGroup对象
-        return vgroup
-    
+
     def construct(self):
         penstage = VGroup()
         var = PentagonalFractal.get_seed_shape(self)
@@ -333,11 +312,15 @@ class TestPentagonal(Scene):
         
         for i in range(3):
             self.play(Transform(penstage, 
-                                TestPentagonal.pent_ita(self, penstage, 5)
+                                selfsimilarfractal_iteration(penstage, 5, PentagonalFractal)
                                 .scale(0.575)))
 
 
 class PentagonalPiCreatureFractal(PentagonalFractal):
+    '''
+        这是一段使用PICreature作为分型的基本单元而出现的代码，因为manimce版本里面并没有PICreature
+        所以说我也不知道该怎么办，但是既然继承自上面的PentagonalFractal五边形分型，想必也一定很聪明吧（智将）
+    '''
     def init_colors(self):
         SelfSimilarFractal.init_colors(self)
         internal_pis = [
@@ -437,6 +420,18 @@ class WonkyHexagonFractal(SelfSimilarFractal):
         p5.move_to(p4.get_top(), DOWN + LEFT)
         p6.move_to(p4.get_bottom(), UP + LEFT)
 
+class TestWonkyHexagon(Scene):
+     
+    def construct(self):
+        penstage = VGroup()
+        var = WonkyHexagonFractal.get_seed_shape(self)
+        penstage.add(var)
+
+        
+        for i in range(3):
+            self.play(Transform(penstage, 
+                                selfsimilarfractal_iteration(penstage, 7, WonkyHexagonFractal)
+                                .scale(0.5)))
 
 class CircularFractal(SelfSimilarFractal):
     num_subparts = 3
@@ -457,6 +452,20 @@ class CircularFractal(SelfSimilarFractal):
             )
             part.rotate(i * 2 * np.pi / self.num_subparts, about_point=ORIGIN)
         self.num_subparts -= 1
+
+
+class TestCircular(Scene):
+
+    def construct(self):
+        penstage = VGroup()
+        var = CircularFractal.get_seed_shape(self)
+        penstage.add(var)
+
+        for i in range(6):
+            self.play(Transform(penstage, 
+                                selfsimilarfractal_iteration(penstage, 3, CircularFractal)
+                                .scale(0.5)))
+
 
 ######## Space filling curves ############
 
