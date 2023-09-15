@@ -88,6 +88,39 @@ class JaggedCurvePiece(VMobject):
             """
 
 
+class FractalCurve(VMobject):
+    """
+    这段代码定义了一个类 FractalCurve，它是 VMobject 的子类。FractalCurve 类的作用是创建一个分形曲线，它有以下的属性和方法：
+
+    - radius：分形曲线的半径，是一个数值，默认为 3。
+    - order：分形曲线的阶数，是一个整数，默认为 5。阶数越高，分形曲线越复杂。
+    - colors：分形曲线的颜色，是一个颜色列表，默认为 [RED, GREEN]。分形曲线会根据这个列表生成一个渐变色。
+    - num_submobjects：分形曲线的子对象数量，是一个整数，默认为 20。
+    子对象是指分形曲线中的每一段锯齿形的曲线片段，它们是 JaggedCurvePiece 类的实例。
+    - monochromatic：分形曲线是否为单色，是一个布尔值，默认为 False。
+    如果为 True，分形曲线不会使用渐变色，而是使用 VMobject 的默认颜色。
+    - order_to_stroke_width_map：分形曲线的阶数和描边宽度的映射，是一个字典，默认为 {3: 3, 4: 2, 5: 1}。
+    这个字典表示不同阶数的分形曲线应该使用的描边宽度，如果阶数超过字典中的最大键值，就使用最大键值对应的描边宽度。
+    - init_points：初始化分形曲线的点，是一个方法。
+    这个方法会调用 get_anchor_points 方法获取分形曲线的角点，然后调用 set_points_as_corners
+    方法把角点设置为 VMobject 的角点。
+
+    - init_colors：初始化分形曲线的颜色，是一个方法。这个方法会调用 VMobject 的 init_colors 方法，
+    并根据 colors 的值设置分形曲线的渐变色。然后根据 order 和 order_to_stroke_width_map 的值设置分形曲线的描边宽度。
+    - get_anchor_points：获取分形曲线的角点，是一个方法。这个方法没有实现，需要在子类中重写。
+    """
+
+    radius = 3
+    order = 5
+    colors = [RED, GREEN]
+    num_submobjects = 20
+    monochromatic = False
+    order_to_stroke_width_map = {
+        3: 3,
+        4: 2,
+        5: 1,
+    }
+
     # 定义一个实例方法，用于初始化点集，这是VMobject类的一个重写方法
     def init_points(self):
         # 调用get_anchor_points方法获取锚点，也就是曲线上的顶点
@@ -101,7 +134,7 @@ class JaggedCurvePiece(VMobject):
             # 对于数列中相邻的两个元素，执行以下操作
             for alpha_pair in zip(alphas, alphas[1:]):
                 # 创建一个JaggedCurvePiece对象，这是一个表示锯齿形曲线片段的类
-                submobject = JaggedCurvePiece()#实例化出现
+                submobject = JaggedCurvePiece()  # 实例化出现
                 # 调用pointwise_become_partial方法将子对象设置为曲线的一部分，参数为数列中的两个元素，表示起始和结束位置
                 submobject.pointwise_become_partial(self, *alpha_pair)
                 # 调用add方法将子对象添加到当前对象中
@@ -126,7 +159,7 @@ class JaggedCurvePiece(VMobject):
     def get_anchor_points(self):
         raise Exception("Not implemented")
 
-    
+
 """
 这段代码定义了一个类 FractalCurve，它是 VMobject 的子类。FractalCurve 类的作用是创建一个分形曲线，它有以下的属性和方法：
 
@@ -149,47 +182,51 @@ class JaggedCurvePiece(VMobject):
 """
 
 
-# 定义一个实例方法，用于对点集进行变换，接受两个参数：points和offset
-def transform(self, points, offset):
-    """
-    How to transform the copy of points shifted by
-    offset.  Generally meant to be extended in subclasses
-    """
-    # 创建一个点集的副本
-    copy = np.array(points)
-    # 如果偏移量在旋转轴字典中有对应的值，则对副本进行旋转变换，旋转轴为对应的值
-    if str(offset) in self.offset_to_rotation_axis:
-        copy = rotate(copy, axis=self.offset_to_rotation_axis[str(offset)])
-    # 对副本进行缩放变换，缩放因子为类属性scale_factor的倒数
-    copy /= (self.scale_factor,)
-    # 对副本进行平移变换，平移向量为偏移量乘以半径乘以半径缩放因子
-    copy += offset * self.radius * self.radius_scale_factor
-    # 返回变换后的副本
-    return copy
+class SelfSimilarSpaceFillingCurve(FractalCurve):
+    offsets = []  # 定义一个类属性，存储每个偏移量对应的旋转轴，键必须是字符串形式
+    # keys must awkwardly be in string form...
+    offset_to_rotation_axis = {}  # 定义一个类属性，存储缩放因子，用于控制子部分的大小
+    scale_factor = 2  # 定义一个类属性，存储半径缩放因子，用于控制子部分的位置
+    radius_scale_factor = 0.5
 
+    # 定义一个实例方法，用于对点集进行变换，接受两个参数：points和offset
+    def transform(self, points, offset):
+        """
+        How to transform the copy of points shifted by
+        offset.  Generally meant to be extended in subclasses
+        """
+        # 创建一个点集的副本
+        copy = np.array(points)
+        # 如果偏移量在旋转轴字典中有对应的值，则对副本进行旋转变换，旋转轴为对应的值
+        if str(offset) in self.offset_to_rotation_axis:
+            copy = rotate(copy, axis=self.offset_to_rotation_axis[str(offset)])
+        # 对副本进行缩放变换，缩放因子为类属性scale_factor的倒数
+        copy /= (self.scale_factor,)
+        # 对副本进行平移变换，平移向量为偏移量乘以半径乘以半径缩放因子
+        copy += offset * self.radius * self.radius_scale_factor
+        # 返回变换后的副本
+        return copy
 
-# 定义一个实例方法，用于将点集细化为子部分，接受一个参数：points
-def refine_into_subparts(self, points):
-    # 对每个偏移量，调用transform方法对点集进行变换，并将结果存入一个列表
-    transformed_copies = [self.transform(points, offset) for offset in self.offsets]
-    # 使用reduce函数将列表中的所有点集合并为一个数组，并返回
-    return reduce(lambda a, b: np.append(a, b, axis=0), transformed_copies)
+    # 定义一个实例方法，用于将点集细化为子部分，接受一个参数：points
+    def refine_into_subparts(self, points):
+        # 对每个偏移量，调用transform方法对点集进行变换，并将结果存入一个列表
+        transformed_copies = [self.transform(points, offset) for offset in self.offsets]
+        # 使用reduce函数将列表中的所有点集合并为一个数组，并返回
+        return reduce(lambda a, b: np.append(a, b, axis=0), transformed_copies)
 
+    # 定义一个实例方法，用于获取锚点，也就是曲线上的顶点
+    def get_anchor_points(self):
+        # 创建一个只包含原点的数组
+        points = np.zeros((1, 3))
+        # 对于每个阶数，调用refine_into_subparts方法将点集细化为子部分，并更新points
+        for count in range(self.order):
+            points = self.refine_into_subparts(points)
+        # 返回最终的点集
+        return points
 
-# 定义一个实例方法，用于获取锚点，也就是曲线上的顶点
-def get_anchor_points(self):
-    # 创建一个只包含原点的数组
-    points = np.zeros((1, 3))
-    # 对于每个阶数，调用refine_into_subparts方法将点集细化为子部分，并更新points
-    for count in range(self.order):
-        points = self.refine_into_subparts(points)
-    # 返回最终的点集
-    return points
-
-
-# 定义一个实例方法，用于生成网格，这是一个抽象方法，需要在子类中实现
-def generate_grid(self):
-    raise Exception("Not implemented")
+    # 定义一个实例方法，用于生成网格，这是一个抽象方法，需要在子类中实现
+    def generate_grid(self):
+        raise Exception("Not implemented")
 
 
 """
@@ -230,53 +267,16 @@ class HilbertCurve(SelfSimilarSpaceFillingCurve):
 
 class TestSlice(Scene):
     def construct(self):
-        curve = HilbertCurve()
+        hilbert_curve = HilbertCurve()
 
-        curve.transform(LEFT, curve.offsets)
-        dot = curve.get_start()
+        hilbert_group = []
+        num = 4
 
-        # # 创建一个空的Vmobject
-        # tri = VMobject()
-        # # 创建一个numpy数组，包含三个点的坐标
-        # points = np.array([
-        #     [1, 0, 0], # 右下角
-        #     [0, 1, 0], # 左上角
-        #     [-1, 0, 0], # 左下角
-        # ])
-        # # 调用set_points方法，把Vmobject的points属性设置为这个数组
-        # tri.set_points_as_corners(points).set_color(WHITE)
-
-        # self.add(tri)
-
-        # # var = curve.points()
-        # handle_lines = [
-        #     Line(
-        #         curve.points[ind],
-        #         curve.points[ind+1],
-        #         color=RED,
-        #         stroke_width=2
-        #     ) for ind in range(0, len(curve.points), 2)
-        # ]
-        # # self.add(dots)
-        # self.add(*handle_lines)
-        # 在曲线片段中插入 4 个新的曲线
-
-        # for i in range(4):
-
-
-# curve = HilbertCurve()
-# # var = curve
-# handle_lines = [
-#     Line(
-#         curve[ind],
-#         curve[ind+1],
-#         color=RED,
-#         stroke_width=2
-#     ) for ind in range(0, len(curve), 2)
-# ]
-
-# self.add(dots)
-# Scene.construct(add(*handle_lines))
-
-
-# sleep(1)
+        for i in range(num):
+            hilbert_curve.order = i + 1
+            points = hilbert_curve.get_anchor_points()
+            hilbert_curve.set_points_as_corners(points)
+            hilbert_curve.colors = [RED, GREEN]
+            self.play(Create(hilbert_curve), run_time=i+1)
+            self.wait()
+            hilbert_group.append(hilbert_curve)
