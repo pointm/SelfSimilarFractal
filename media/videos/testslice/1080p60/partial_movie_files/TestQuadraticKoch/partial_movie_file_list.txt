@@ -1,0 +1,7 @@
+# This file is used internally by FFMPEG.
+file 'file:C:/Users/Feynman/Documents/00课件-2023春-2023秋/GitGubStatus/JuliaSetinManim/media/videos/testslice/1080p60/partial_movie_files/TestQuadraticKoch/1413466013_345330683_223132457.mp4'
+file 'file:C:/Users/Feynman/Documents/00课件-2023春-2023秋/GitGubStatus/JuliaSetinManim/media/videos/testslice/1080p60/partial_movie_files/TestQuadraticKoch/1672018281_3315967912_3526756490.mp4'
+file 'file:C:/Users/Feynman/Documents/00课件-2023春-2023秋/GitGubStatus/JuliaSetinManim/media/videos/testslice/1080p60/partial_movie_files/TestQuadraticKoch/1672018281_543541367_929770935.mp4'
+file 'file:C:/Users/Feynman/Documents/00课件-2023春-2023秋/GitGubStatus/JuliaSetinManim/media/videos/testslice/1080p60/partial_movie_files/TestQuadraticKoch/1672018281_2270968988_3105106536.mp4'
+file 'file:C:/Users/Feynman/Documents/00课件-2023春-2023秋/GitGubStatus/JuliaSetinManim/media/videos/testslice/1080p60/partial_movie_files/TestQuadraticKoch/1672018281_1517830736_1785339050.mp4'
+file 'file:C:/Users/Feynman/Documents/00课件-2023春-2023秋/GitGubStatus/JuliaSetinManim/media/videos/testslice/1080p60/partial_movie_files/TestQuadraticKoch/1672018281_3315967912_1234016350.mp4'

@@ -1,0 +1,9 @@
+# This file is used internally by FFMPEG.
+file 'file:C:/Users/Feynman/Documents/00课件-2023春-2023秋/GitGubStatus/JuliaSetinManim/media/videos/fractalsBY3B1B/1080p60/partial_movie_files/TestSnakeCurve/1413466013_3574244351_223132457.mp4'
+file 'file:C:/Users/Feynman/Documents/00课件-2023春-2023秋/GitGubStatus/JuliaSetinManim/media/videos/fractalsBY3B1B/1080p60/partial_movie_files/TestSnakeCurve/1672018281_3315967912_2506297229.mp4'
+file 'file:C:/Users/Feynman/Documents/00课件-2023春-2023秋/GitGubStatus/JuliaSetinManim/media/videos/fractalsBY3B1B/1080p60/partial_movie_files/TestSnakeCurve/1672018281_1150973532_2673458437.mp4'
+file 'file:C:/Users/Feynman/Documents/00课件-2023春-2023秋/GitGubStatus/JuliaSetinManim/media/videos/fractalsBY3B1B/1080p60/partial_movie_files/TestSnakeCurve/1672018281_23859414_4216818867.mp4'
+file 'file:C:/Users/Feynman/Documents/00课件-2023春-2023秋/GitGubStatus/JuliaSetinManim/media/videos/fractalsBY3B1B/1080p60/partial_movie_files/TestSnakeCurve/1672018281_1066587598_2963907173.mp4'
+file 'file:C:/Users/Feynman/Documents/00课件-2023春-2023秋/GitGubStatus/JuliaSetinManim/media/videos/fractalsBY3B1B/1080p60/partial_movie_files/TestSnakeCurve/1672018281_1919349568_4001503087.mp4'
+file 'file:C:/Users/Feynman/Documents/00课件-2023春-2023秋/GitGubStatus/JuliaSetinManim/media/videos/fractalsBY3B1B/1080p60/partial_movie_files/TestSnakeCurve/1672018281_4237016461_3729612349.mp4'
+file 'file:C:/Users/Feynman/Documents/00课件-2023春-2023秋/GitGubStatus/JuliaSetinManim/media/videos/fractalsBY3B1B/1080p60/partial_movie_files/TestSnakeCurve/1672018281_3315967912_1939617786.mp4'

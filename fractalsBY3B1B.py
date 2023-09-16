@@ -1184,8 +1184,60 @@ class QuadraticKoch(LindenmayerCurve):
     angle = np.pi / 2
 
 
+class TestQuadraticKoch(Scene):
+    def construct(self):
+        num = 4
+        quadratic_group = [QuadraticKoch() for i in range(num)]
+        # 实例化了一次之后这个实例在循环里面被调用时候应该使用copy方法复制一份
+        # 不然的话循环里面重复调用同一个实例化的物体势必会出问题
+        # 非要在循环里面重复调用同一个类的话应该重复实例化多次再加进去
+
+        for i in range(num):
+            quadratic_group[i].order = i + 2
+            quadratic_group[i].init_points()  # 原来父类里面写了怎么连线的方法，，大意了没有闪
+            # 下一次一定会好好看父类的！
+            quadratic_group[i].init_colors()
+            # quadratic_group[i].set_stroke(width=4)  # 设置曲线宽度为固定值
+            quadratic_group[i].scale(3)  # 进行缩放
+
+        self.play(Create(quadratic_group[0]))
+        self.wait()
+
+        for i in range(len(quadratic_group) - 1):
+            self.play(ReplacementTransform(quadratic_group[i], quadratic_group[i + 1]))
+        self.wait()
+
+
 class QuadraticKochIsland(QuadraticKoch):
     axiom = "A+A+A+A"
+
+
+class TestQuadraticKochIsland(Scene):
+    def construct(self):
+        num = 3
+        quadratickocgisland_group = [QuadraticKochIsland() for i in range(num)]
+        # 实例化了一次之后这个实例在循环里面被调用时候应该使用copy方法复制一份
+        # 不然的话循环里面重复调用同一个实例化的物体势必会出问题
+        # 非要在循环里面重复调用同一个类的话应该重复实例化多次再加进去
+
+        for i in range(num):
+            quadratickocgisland_group[i].order = i + 2
+            quadratickocgisland_group[i].init_points()  # 原来父类里面写了怎么连线的方法，，大意了没有闪
+            # 下一次一定会好好看父类的！
+            quadratickocgisland_group[i].init_colors()
+            # quadratickocgisland_group[i].set_stroke(width=4)  # 设置曲线宽度为固定值
+            # quadratickocgisland_group[i].scale(3)#进行缩放
+
+        self.play(Create(quadratickocgisland_group[0]))
+        self.wait()
+
+        for i in range(len(quadratickocgisland_group) - 1):
+            self.play(
+                ReplacementTransform(
+                    quadratickocgisland_group[i], quadratickocgisland_group[i + 1]
+                )
+            )
+        self.wait()
 
 
 class StellarCurve(LindenmayerCurve):
@@ -1199,22 +1251,122 @@ class StellarCurve(LindenmayerCurve):
     angle = 2 * np.pi / 5
 
 
+class TestStellarCurve(Scene):
+    def construct(self):
+        num = 4
+        stellarcurve_group = [StellarCurve() for i in range(num)]
+        # 实例化了一次之后这个实例在循环里面被调用时候应该使用copy方法复制一份
+        # 不然的话循环里面重复调用同一个实例化的物体势必会出问题
+        # 非要在循环里面重复调用同一个类的话应该重复实例化多次再加进去
+
+        for i in range(num):
+            stellarcurve_group[i].order = i + 2
+            stellarcurve_group[i].init_points()  # 原来父类里面写了怎么连线的方法，，大意了没有闪
+            # 下一次一定会好好看父类的！
+            stellarcurve_group[i].init_colors()
+            # stellarcurve_group[i].set_stroke(width=4)  # 设置曲线宽度为固定值
+            stellarcurve_group[i].scale(2)  # 进行缩放
+
+        self.play(Create(stellarcurve_group[0]))
+        self.wait()
+
+        for i in range(len(stellarcurve_group) - 1):
+            if i < len(stellarcurve_group) - 1 - 1:
+                self.play(
+                    ReplacementTransform(
+                        stellarcurve_group[i], stellarcurve_group[i + 1]
+                    )
+                )
+            else:
+                self.play(
+                    ReplacementTransform(
+                        stellarcurve_group[i], stellarcurve_group[i + 1].scale(0.9)
+                    )
+                )
+        self.wait()
+
+
+# 定义一个SnakeCurve类，继承自FractalCurve类
 class SnakeCurve(FractalCurve):
+    """
+        SnakeCurve类是一个用于绘制蛇形曲线（snake curve）的类，蛇形曲线是一种由英国数学家布莱恩·哈罗德·普朗克特（Brian Harold Plunkett）发明的分形曲线。
+
+    这段代码中，SnakeCurve类有以下几个属性和方法：
+
+    start_color：一个常量，表示绘制蛇形曲线时使用的起始颜色，这里使用了BLUE，表示蓝色。
+    end_color：一个常量，表示绘制蛇形曲线时使用的结束颜色，这里使用了YELLOW，表示黄色。
+    get_anchor_points：一个方法，用于根据迭代次数（order）生成锚点（anchor points），锚点是用于绘制曲线的关键点。它没有参数。它的返回值是一个列表（result），表示锚点的坐标。它的工作流程是：
+    首先，它根据order计算出分辨率（resolution），分辨率是每条边上的点数，它等于2的order次方。
+    然后，它根据radius和resolution计算出步长（step），步长是每次移动时沿着方向移动的距离，它等于2乘以radius除以resolution。
+    接着，它根据radius和step计算出左下角（lower_left）的位置，左下角是绘制蛇形曲线时开始的位置，它等于原点（ORIGIN）向左移动radius减去step除以2的距离，再向下移动radius减去step除以2的距离。
+    然后，它创建一个空列表result。
+    接着，它根据resolution进行垂直方向（y）的循环迭代。
+    然后，它创建一个列表x_range，表示水平方向（x）上的点数范围，它等于从0到resolution-1的整数列表。
+    接着，它根据y是否为偶数进行判断：
+    如果y为偶数，就将x_range反转（x_range.reverse()），表示从右向左移动；
+    如果y为奇数，就保持x_range不变，表示从左向右移动。
+    然后，它根据x_range进行水平方向（x）的循环迭代。
+    接着，它根据lower_left、x和y计算出当前位置（curr），并将其添加到result中。当前位置等于左下角加上x乘以step乘以右方向（RIGHT），再加上y乘以step乘以上方向（UP）。
+    最后，它返回result。
+    """
+
+    # 定义绘制蛇形曲线时使用的起始颜色为蓝色
     start_color = BLUE
+    # 定义绘制蛇形曲线时使用的结束颜色为黄色
     end_color = YELLOW
 
+    # 定义一个方法，用于根据迭代次数（order）生成锚点（anchor points），锚点是用于绘制曲线的关键点
     def get_anchor_points(self):
+        # 创建一个空列表result
         result = []
+        # 根据order计算出分辨率（resolution），分辨率是每条边上的点数，它等于2的order次方
         resolution = 2**self.order
+        # 根据radius和resolution计算出步长（step），步长是每次移动时沿着方向移动的距离，它等于2乘以radius除以resolution
         step = 2.0 * self.radius / resolution
+        # 根据radius和step计算出左下角（lower_left）的位置，左下角是绘制蛇形曲线时开始的位置，它等于原点（ORIGIN）向左移动radius减去step除以2的距离，再向下移动radius减去step除以2的距离
         lower_left = (
             ORIGIN + LEFT * (self.radius - step / 2) + DOWN * (self.radius - step / 2)
         )
 
+        # 根据resolution进行垂直方向（y）的循环迭代
         for y in range(resolution):
+            # 创建一个列表x_range，表示水平方向（x）上的点数范围，它等于从0到resolution-1的整数列表
             x_range = list(range(resolution))
+            # 根据y是否为偶数进行判断：
             if y % 2 == 0:
+                # 如果y为偶数，就将x_range反转（x_range.reverse()），表示从右向左移动
                 x_range.reverse()
+            # 如果y为奇数，就保持x_range不变，表示从左向右移动
+
+            # 根据x_range进行水平方向（x）的循环迭代
             for x in x_range:
-                result.append(lower_left + x * step * RIGHT + y * step * UP)
+                # 根据lower_left、x和y计算出当前位置（curr），并将其添加到result中。当前位置等于左下角加上x乘以step乘以右方向（RIGHT），再加上y乘以step乘以上方向（UP）
+                curr = lower_left + x * step * RIGHT + y * step * UP
+                result.append(curr)
+        # 返回result
         return result
+    
+class TestSnakeCurve(Scene):
+    def construct(self):
+        num = 6
+        snakecurve_group = [SnakeCurve() for i in range(num)]
+        # 实例化了一次之后这个实例在循环里面被调用时候应该使用copy方法复制一份
+        # 不然的话循环里面重复调用同一个实例化的物体势必会出问题
+        # 非要在循环里面重复调用同一个类的话应该重复实例化多次再加进去
+
+        for i in range(num):
+            snakecurve_group[i].order = i + 2
+            snakecurve_group[i].init_points()  # 原来父类里面写了怎么连线的方法，，大意了没有闪
+            # 下一次一定会好好看父类的！
+            snakecurve_group[i].init_colors()
+            # snakecurve_group[i].set_stroke(width=4)  # 设置曲线宽度为固定值
+            snakecurve_group[i].scale(1.3)  # 进行缩放
+
+        self.play(Create(snakecurve_group[0]))
+        self.wait()
+
+        for i in range(len(snakecurve_group) - 1):
+            self.play(
+                ReplacementTransform(snakecurve_group[i], snakecurve_group[i + 1])
+            )
+        self.wait()

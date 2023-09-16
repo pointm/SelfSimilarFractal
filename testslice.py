@@ -279,86 +279,88 @@ class LindenmayerCurve(FractalCurve):
         return np.array(result) - center_of_mass(result)
 
 
-class KochSnowFlake(LindenmayerCurve):
-    colors = [BLUE_D, WHITE, BLUE_D]
-    axiom = "A--A--A--"
-    rule = {"A": "A+A--A+A"}
-    radius = 4
-    scale_factor = 3
-    start_step = RIGHT
-    angle = np.pi / 3
-    order_to_stroke_width_map = {
-        3: 3,
-        5: 2,
-        6: 1,
-    }
+# 定义一个SnakeCurve类，继承自FractalCurve类
+class SnakeCurve(FractalCurve):
+    """
+        SnakeCurve类是一个用于绘制蛇形曲线（snake curve）的类，蛇形曲线是一种由英国数学家布莱恩·哈罗德·普朗克特（Brian Harold Plunkett）发明的分形曲线。
 
-    # def __init__(self, **kwargs):
-    #     # 将属性作为关键字参数传递给父类的构造函数
-    #     LindenmayerCurve.__init__(
-    #         self,
-    #         colors=self.colors,
-    #         axiom=self.axiom,
-    #         rule=self.rule,
-    #         radius=self.radius,
-    #         scale_factor=self.scale_factor,
-    #         start_step=self.start_step,
-    #         angle=self.angle,
-    #         order_to_stroke_width_map=self.order_to_stroke_width_map,
-    #         **kwargs
-    #     )
-    #     # 删除digest_config函数的调用
-    #     # digest_config(self, kwargs)
-    #     # 将scale_factor属性放在父类构造函数之后
-    #     self.scale_factor = 2 * (1 + np.cos(self.angle))
-    #     self.set_points_as_corners([*self.generate_points(), self.points[0]])
+    这段代码中，SnakeCurve类有以下几个属性和方法：
+
+    start_color：一个常量，表示绘制蛇形曲线时使用的起始颜色，这里使用了BLUE，表示蓝色。
+    end_color：一个常量，表示绘制蛇形曲线时使用的结束颜色，这里使用了YELLOW，表示黄色。
+    get_anchor_points：一个方法，用于根据迭代次数（order）生成锚点（anchor points），锚点是用于绘制曲线的关键点。它没有参数。它的返回值是一个列表（result），表示锚点的坐标。它的工作流程是：
+    首先，它根据order计算出分辨率（resolution），分辨率是每条边上的点数，它等于2的order次方。
+    然后，它根据radius和resolution计算出步长（step），步长是每次移动时沿着方向移动的距离，它等于2乘以radius除以resolution。
+    接着，它根据radius和step计算出左下角（lower_left）的位置，左下角是绘制蛇形曲线时开始的位置，它等于原点（ORIGIN）向左移动radius减去step除以2的距离，再向下移动radius减去step除以2的距离。
+    然后，它创建一个空列表result。
+    接着，它根据resolution进行垂直方向（y）的循环迭代。
+    然后，它创建一个列表x_range，表示水平方向（x）上的点数范围，它等于从0到resolution-1的整数列表。
+    接着，它根据y是否为偶数进行判断：
+    如果y为偶数，就将x_range反转（x_range.reverse()），表示从右向左移动；
+    如果y为奇数，就保持x_range不变，表示从左向右移动。
+    然后，它根据x_range进行水平方向（x）的循环迭代。
+    接着，它根据lower_left、x和y计算出当前位置（curr），并将其添加到result中。当前位置等于左下角加上x乘以step乘以右方向（RIGHT），再加上y乘以step乘以上方向（UP）。
+    最后，它返回result。
+    """
+
+    # 定义绘制蛇形曲线时使用的起始颜色为蓝色
+    start_color = BLUE
+    # 定义绘制蛇形曲线时使用的结束颜色为黄色
+    end_color = YELLOW
+
+    # 定义一个方法，用于根据迭代次数（order）生成锚点（anchor points），锚点是用于绘制曲线的关键点
+    def get_anchor_points(self):
+        # 创建一个空列表result
+        result = []
+        # 根据order计算出分辨率（resolution），分辨率是每条边上的点数，它等于2的order次方
+        resolution = 2**self.order
+        # 根据radius和resolution计算出步长（step），步长是每次移动时沿着方向移动的距离，它等于2乘以radius除以resolution
+        step = 2.0 * self.radius / resolution
+        # 根据radius和step计算出左下角（lower_left）的位置，左下角是绘制蛇形曲线时开始的位置，它等于原点（ORIGIN）向左移动radius减去step除以2的距离，再向下移动radius减去step除以2的距离
+        lower_left = (
+            ORIGIN + LEFT * (self.radius - step / 2) + DOWN * (self.radius - step / 2)
+        )
+
+        # 根据resolution进行垂直方向（y）的循环迭代
+        for y in range(resolution):
+            # 创建一个列表x_range，表示水平方向（x）上的点数范围，它等于从0到resolution-1的整数列表
+            x_range = list(range(resolution))
+            # 根据y是否为偶数进行判断：
+            if y % 2 == 0:
+                # 如果y为偶数，就将x_range反转（x_range.reverse()），表示从右向左移动
+                x_range.reverse()
+            # 如果y为奇数，就保持x_range不变，表示从左向右移动
+
+            # 根据x_range进行水平方向（x）的循环迭代
+            for x in x_range:
+                # 根据lower_left、x和y计算出当前位置（curr），并将其添加到result中。当前位置等于左下角加上x乘以step乘以右方向（RIGHT），再加上y乘以step乘以上方向（UP）
+                curr = lower_left + x * step * RIGHT + y * step * UP
+                result.append(curr)
+        # 返回result
+        return result
 
 
-class TestKochSnowFlake(Scene):
+class TestSnakeCurve(Scene):
     def construct(self):
-        num = 3
-        kochsnow_group = [KochSnowFlake() for i in range(num)]
+        num = 6
+        snakecurve_group = [SnakeCurve() for i in range(num)]
         # 实例化了一次之后这个实例在循环里面被调用时候应该使用copy方法复制一份
         # 不然的话循环里面重复调用同一个实例化的物体势必会出问题
         # 非要在循环里面重复调用同一个类的话应该重复实例化多次再加进去
 
         for i in range(num):
-            kochsnow_group[i].order = i + 2
-            kochsnow_group[i].init_points()  # 原来父类里面写了怎么连线的方法，，大意了没有闪
+            snakecurve_group[i].order = i + 2
+            snakecurve_group[i].init_points()  # 原来父类里面写了怎么连线的方法，，大意了没有闪
             # 下一次一定会好好看父类的！
-            kochsnow_group[i].init_colors()
-            # kochsnow_group[i].set_stroke(width=4)  # 设置曲线宽度为固定值
+            snakecurve_group[i].init_colors()
+            # snakecurve_group[i].set_stroke(width=4)  # 设置曲线宽度为固定值
+            snakecurve_group[i].scale(1.3)  # 进行缩放
 
-        self.play(Create(kochsnow_group[0]))
+        self.play(Create(snakecurve_group[0]))
         self.wait()
 
-        for i in range(len(kochsnow_group) - 1):
-            self.play(ReplacementTransform(kochsnow_group[i], kochsnow_group[i + 1]))
-        self.wait()
-
-
-class KochCurve(KochSnowFlake):
-    axiom = "A--"
-
-
-class TestKochCurve(Scene):
-    def construct(self):
-        num = 3
-        kochcurve_group = [KochCurve() for i in range(num)]
-        # 实例化了一次之后这个实例在循环里面被调用时候应该使用copy方法复制一份
-        # 不然的话循环里面重复调用同一个实例化的物体势必会出问题
-        # 非要在循环里面重复调用同一个类的话应该重复实例化多次再加进去
-
-        for i in range(num):
-            kochcurve_group[i].order = i + 2
-            kochcurve_group[i].init_points()  # 原来父类里面写了怎么连线的方法，，大意了没有闪
-            # 下一次一定会好好看父类的！
-            kochcurve_group[i].init_colors()
-            # kochcurve_group[i].set_stroke(width=4)  # 设置曲线宽度为固定值
-
-        self.play(Create(kochcurve_group[0]))
-        self.wait()
-
-        for i in range(len(kochcurve_group) - 1):
-            self.play(ReplacementTransform(kochcurve_group[i], kochcurve_group[i + 1]))
+        for i in range(len(snakecurve_group) - 1):
+            self.play(
+                ReplacementTransform(snakecurve_group[i], snakecurve_group[i + 1])
+            )
         self.wait()

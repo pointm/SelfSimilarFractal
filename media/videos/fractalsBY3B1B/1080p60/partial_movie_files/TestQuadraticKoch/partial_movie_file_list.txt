@@ -1,0 +1,7 @@
+# This file is used internally by FFMPEG.
+file 'file:C:/Users/Feynman/Documents/00课件-2023春-2023秋/GitGubStatus/JuliaSetinManim/media/videos/fractalsBY3B1B/1080p60/partial_movie_files/TestQuadraticKoch/1413466013_512467696_223132457.mp4'
+file 'file:C:/Users/Feynman/Documents/00课件-2023春-2023秋/GitGubStatus/JuliaSetinManim/media/videos/fractalsBY3B1B/1080p60/partial_movie_files/TestQuadraticKoch/1672018281_3315967912_3208676910.mp4'
+file 'file:C:/Users/Feynman/Documents/00课件-2023春-2023秋/GitGubStatus/JuliaSetinManim/media/videos/fractalsBY3B1B/1080p60/partial_movie_files/TestQuadraticKoch/1672018281_4236880473_1323827818.mp4'
+file 'file:C:/Users/Feynman/Documents/00课件-2023春-2023秋/GitGubStatus/JuliaSetinManim/media/videos/fractalsBY3B1B/1080p60/partial_movie_files/TestQuadraticKoch/1672018281_3051210468_881008745.mp4'
+file 'file:C:/Users/Feynman/Documents/00课件-2023春-2023秋/GitGubStatus/JuliaSetinManim/media/videos/fractalsBY3B1B/1080p60/partial_movie_files/TestQuadraticKoch/1672018281_753288778_2650211397.mp4'
+file 'file:C:/Users/Feynman/Documents/00课件-2023春-2023秋/GitGubStatus/JuliaSetinManim/media/videos/fractalsBY3B1B/1080p60/partial_movie_files/TestQuadraticKoch/1672018281_3315967912_590878796.mp4'
