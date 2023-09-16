@@ -182,148 +182,183 @@ class FractalCurve(VMobject):
 """
 
 
-class SelfSimilarSpaceFillingCurve(FractalCurve):
-    offsets = []  # 定义一个类属性，存储每个偏移量对应的旋转轴，键必须是字符串形式
-    # keys must awkwardly be in string form...
-    offset_to_rotation_axis = {}  # 定义一个类属性，存储缩放因子，用于控制子部分的大小
-    scale_factor = 2  # 定义一个类属性，存储半径缩放因子，用于控制子部分的位置
-    radius_scale_factor = 0.5
+# 定义一个LindenmayerCurve类，继承自FractalCurve类
+class LindenmayerCurve(FractalCurve):
+    """
+        这段代码中，LindenmayerCurve类有以下几个属性和方法：
 
-    # 定义一个实例方法，用于对点集进行变换，接受两个参数：points和offset
-    def transform(self, points, offset):
-        """
-        How to transform the copy of points shifted by
-        offset.  Generally meant to be extended in subclasses
-        """
-        # 创建一个点集的副本
-        copy = np.array(points)
-        # 如果偏移量在旋转轴字典中有对应的值，则对副本进行旋转变换，旋转轴为对应的值
-        if str(offset) in self.offset_to_rotation_axis:
-            copy = rotate(copy, axis=self.offset_to_rotation_axis[str(offset)])
-        # 对副本进行缩放变换，缩放因子为类属性scale_factor的倒数
-        copy /= (self.scale_factor,)
-        # 对副本进行平移变换，平移向量为偏移量乘以半径乘以半径缩放因子
-        copy += offset * self.radius * self.radius_scale_factor
-        # 返回变换后的副本
-        return copy
+    axiom：一个字符串，表示L系统的初始符号，这里使用了"A"。
+    rule：一个字典，表示L系统的产生规则，这里使用了一个空字典。
+    scale_factor：一个整数，表示每次迭代时缩放的比例，这里使用了2。
+    radius：一个整数，表示绘制L系统时使用的半径，这里使用了3。
+    start_step：一个常量，表示绘制L系统时开始的方向，这里使用了RIGHT，表示向右。
+    angle：一个浮点数，表示每次转弯时的角度，这里使用了np.pi / 2，表示90度。
+    expand_command_string：一个方法，用于将一个命令字符串按照产生规则进行扩展，返回一个新的命令字符串。它的参数是command，表示要扩展的命令字符串。它的返回值是result，表示扩展后的命令字符串。它的工作流程是：
+    首先，它创建一个空字符串result。
+    然后，它遍历command中的每个字母letter。
+    接着，它检查letter是否在rule中有对应的值，如果有，就将值添加到result中；如果没有，就将letter本身添加到result中。
+    最后，它返回result。
+    get_command_string：一个方法，用于根据迭代次数（order）生成最终的命令字符串。它没有参数。它的返回值是result，表示最终的命令字符串。它的工作流程是：
+    首先，它将axiom赋值给result。
+    然后，它根据order进行循环迭代。
+    接着，它调用expand_command_string方法对result进行扩展，并将返回值重新赋值给result。
+    最后，它返回result。
+    get_anchor_points：一个方法，用于根据命令字符串生成锚点（anchor points），锚点是用于绘制曲线的关键点。它没有参数。它的返回值是一个NumPy数组（np.array），表示锚点的坐标。它的工作流程是：
+    首先，它根据radius和start_step计算出初始的步长（step），并根据scale_factor和order对其进行缩放。步长是每次移动时沿着方向移动的距离。
+    然后，它创建一个零向量（np.zeros(3)），表示当前的位置（curr）。
+    接着，它创建一个列表（result），并将curr添加到其中。列表中存储了所有锚点的位置。
+    然后，它调用get_command_string方法获取最终的命令字符串，并遍历其中的每个字母letter。
+    接着，它根据letter进行判断：
+    如果letter是"+"，就将step向左旋转angle度（rotate(step, self.angle)）；
+    如果letter是"-"，就将step向右旋转angle度（rotate(step, -self.angle)）；
+    否则，就将curr加上step，并将新的curr添加到result中。
+    最后，它将result转换成NumPy数组，并减去其质心（center_of_mass(result)），使其居中对齐，并返回该数组。
+    """
 
-    # 定义一个实例方法，用于将点集细化为子部分，接受一个参数：points
-    def refine_into_subparts(self, points):
-        # 对每个偏移量，调用transform方法对点集进行变换，并将结果存入一个列表
-        transformed_copies = [self.transform(points, offset) for offset in self.offsets]
-        # 使用reduce函数将列表中的所有点集合并为一个数组，并返回
-        return reduce(lambda a, b: np.append(a, b, axis=0), transformed_copies)
+    # 定义L系统的初始符号为"A"
+    axiom = "A"
+    # 定义L系统的产生规则为空字典
+    rule = {}
+    # 定义每次迭代时缩放的比例为2
+    scale_factor = 2
+    # 定义绘制L系统时使用的半径为3
+    radius = 3
+    # 定义绘制L系统时开始的方向为右
+    start_step = RIGHT
+    # 定义每次转弯时的角度为90度
+    angle = np.pi / 2
 
-    # 定义一个实例方法，用于获取锚点，也就是曲线上的顶点
+    # 定义一个方法，用于将一个命令字符串按照产生规则进行扩展，返回一个新的命令字符串
+    def expand_command_string(self, command):
+        # 创建一个空字符串result
+        result = ""
+        # 遍历command中的每个字母letter
+        for letter in command:
+            # 如果letter在rule中有对应的值，就将值添加到result中；如果没有，就将letter本身添加到result中
+            if letter in self.rule:
+                result += self.rule[letter]
+            else:
+                result += letter
+        # 返回result
+        return result
+
+    # 定义一个方法，用于根据迭代次数（order）生成最终的命令字符串
+    def get_command_string(self):
+        # 将axiom赋值给result
+        result = self.axiom
+        # 根据order进行循环迭代
+        for x in range(self.order):
+            # 调用expand_command_string方法对result进行扩展，并将返回值重新赋值给result
+            result = self.expand_command_string(result)
+        # 返回result
+        return result
+
+    # 定义一个方法，用于根据命令字符串生成锚点（anchor points），锚点是用于绘制曲线的关键点
     def get_anchor_points(self):
-        # 创建一个只包含原点的数组
-        points = np.zeros((1, 3))
-        # 对于每个阶数，调用refine_into_subparts方法将点集细化为子部分，并更新points
-        for count in range(self.order):
-            points = self.refine_into_subparts(points)
-        # 返回最终的点集
-        return points
-
-    # 定义一个实例方法，用于生成网格，这是一个抽象方法，需要在子类中实现
-    def generate_grid(self):
-        raise Exception("Not implemented")
-
-
-"""
-这段代码是用来定义一个自相似空间填充曲线的类的，它继承了FractalCurve类。这个类有以下几个属性和方法：
-
-- offsets: 一个列表，存储了每个子曲线相对于原始曲线的偏移量。
-- offset_to_rotation_axis: 一个字典，存储了每个偏移量对应的旋转轴，用来旋转子曲线。键必须是字符串形式的偏移量。
-- scale_factor: 一个数字，表示子曲线相对于原始曲线的缩放比例。
-- radius_scale_factor: 一个数字，表示子曲线相对于原始曲线的半径缩放比例。
-- transform(self, points, offset): 一个方法，用来对原始曲线的点进行变换，生成子曲线的点。
-它接受两个参数：points是一个numpy数组，表示原始曲线的点；offset是一个三维向量，表示偏移量。
-它首先检查偏移量是否在offset_to_rotation_axis中，如果是，则对points进行旋转；然后对points进行缩放；最后加上偏移量乘以半径和半径缩放比例。
-返回变换后的点。
-- refine_into_subparts(self, points): 一个方法，用来把原始曲线的点细化成多个子曲线的点。
-它接受一个参数：points是一个numpy数组，表示原始曲线的点。它遍历offsets中的每个偏移量，调用transform方法生成子曲线的点，并把它们拼接起来。
-返回拼接后的点。
-- get_anchor_points(self): 一个方法，用来获取曲线的锚点。
-它不接受任何参数。它首先创建一个零向量作为初始点，然后根据order属性（从FractalCurve类继承）重复调用refine_into_subparts方法，每次细化一次。
-返回最终细化后的点。
-- generate_grid(self): 一个方法，用来生成网格。它不接受任何参数。它抛出一个异常，表示没有实现。这个方法应该在子类中重写。
-
-: [FractalCurve](https://github.com/3b1b/manim/blob/master/manimlib/mobject/fractals.py)
-"""
+        # 根据radius和start_step计算出初始的步长（step），并根据scale_factor和order对其进行缩放。步长是每次移动时沿着方向移动的距离。
+        step = float(self.radius) * self.start_step
+        step /= self.scale_factor**self.order
+        # 创建一个零向量（np.zeros(3)），表示当前的位置（curr）
+        curr = np.zeros(3)
+        # 创建一个列表（result），并将curr添加到其中。列表中存储了所有锚点的位置。
+        result = [curr]
+        # 调用get_command_string方法获取最终的命令字符串，并遍历其中的每个字母letter
+        for letter in self.get_command_string():
+            # 根据letter进行判断：
+            if letter == "+":
+                # 如果letter是"+"，就将step向左旋转angle度（rotate(step, self.angle)）
+                step = rotate(step, self.angle)
+            elif letter == "-":
+                # 如果letter是"-"，就将step向右旋转angle度（rotate(step, -self.angle)）
+                step = rotate(step, -self.angle)
+            else:
+                # 否则，就将curr加上step，并将新的curr添加到result中。
+                curr = curr + step
+                result.append(curr)
+        # 将result转换成NumPy数组，并减去其质心（center_of_mass(result)），使其居中对齐，并返回该数组。
+        return np.array(result) - center_of_mass(result)
 
 
-class HilbertCurve(SelfSimilarSpaceFillingCurve):
-    offsets = [
-        LEFT + DOWN,
-        LEFT + UP,
-        RIGHT + UP,
-        RIGHT + DOWN,
-    ]
-    offset_to_rotation_axis = {
-        str(LEFT + DOWN): RIGHT + UP,
-        str(RIGHT + DOWN): RIGHT + DOWN,
-    }
-
-
-class PeanoCurve(SelfSimilarSpaceFillingCurve):
-    colors = [PURPLE, TEAL]
-    offsets = [
-        LEFT + DOWN,
-        LEFT,
-        LEFT + UP,
-        UP,
-        ORIGIN,
-        DOWN,
-        RIGHT + DOWN,
-        RIGHT,
-        RIGHT + UP,
-    ]
-    offset_to_rotation_axis = {
-        str(LEFT): UP,
-        str(UP): RIGHT,
-        str(ORIGIN): LEFT + UP,
-        str(DOWN): RIGHT,
-        str(RIGHT): UP,
-    }
+class KochSnowFlake(LindenmayerCurve):
+    colors = [BLUE_D, WHITE, BLUE_D]
+    axiom = "A--A--A--"
+    rule = {"A": "A+A--A+A"}
+    radius = 4
     scale_factor = 3
-    radius_scale_factor = 2.0 / 3
+    start_step = RIGHT
+    angle = np.pi / 3
+    order_to_stroke_width_map = {
+        3: 3,
+        5: 2,
+        6: 1,
+    }
+
+    # def __init__(self, **kwargs):
+    #     # 将属性作为关键字参数传递给父类的构造函数
+    #     LindenmayerCurve.__init__(
+    #         self,
+    #         colors=self.colors,
+    #         axiom=self.axiom,
+    #         rule=self.rule,
+    #         radius=self.radius,
+    #         scale_factor=self.scale_factor,
+    #         start_step=self.start_step,
+    #         angle=self.angle,
+    #         order_to_stroke_width_map=self.order_to_stroke_width_map,
+    #         **kwargs
+    #     )
+    #     # 删除digest_config函数的调用
+    #     # digest_config(self, kwargs)
+    #     # 将scale_factor属性放在父类构造函数之后
+    #     self.scale_factor = 2 * (1 + np.cos(self.angle))
+    #     self.set_points_as_corners([*self.generate_points(), self.points[0]])
 
 
-class TestHilbertCurve(Scene):
+class TestKochSnowFlake(Scene):
     def construct(self):
-        hilbert_curve = HilbertCurve()
-
-        hilbert_group = []
-        num = 4
+        num = 3
+        kochsnow_group = [KochSnowFlake() for i in range(num)]
+        # 实例化了一次之后这个实例在循环里面被调用时候应该使用copy方法复制一份
+        # 不然的话循环里面重复调用同一个实例化的物体势必会出问题
+        # 非要在循环里面重复调用同一个类的话应该重复实例化多次再加进去
 
         for i in range(num):
-            hilbert_curve.order = i + 1
-            points = hilbert_curve.get_anchor_points()
-            hilbert_curve.set_points_as_corners(points)
-            hilbert_curve.colors = [RED, GREEN]
-            self.play(Create(hilbert_curve), run_time=i + 1)
-            self.wait()
-            hilbert_group.append(hilbert_curve)
+            kochsnow_group[i].order = i + 2
+            kochsnow_group[i].init_points()  # 原来父类里面写了怎么连线的方法，，大意了没有闪
+            # 下一次一定会好好看父类的！
+            kochsnow_group[i].init_colors()
+            # kochsnow_group[i].set_stroke(width=4)  # 设置曲线宽度为固定值
 
-
-class TestSetPoints(Scene):
-    # 探究不同的set_points方法对结果的影响
-    def construct(self):
-        peano_curve = PeanoCurve()
-        peano_curve.order = 2
-        points = peano_curve.get_anchor_points()
-        peano_curve.set_stroke(width=4)#设置线段宽度
-
-        pe1 = peano_curve.copy()
-        pe1.colors = [RED, GREEN]
-
-        peano_curve.set_points(points)
-        pe1.set_points_as_corners(points)
-
-        dots = VGroup()
-        for var in points:
-            dots.add(Dot(radius=0.01).move_to(var))
-        self.add(dots)
-        self.play(Create(pe1), run_time=2, rate_func = lambda t:t)
+        self.play(Create(kochsnow_group[0]))
         self.wait()
-        self.play(Create(peano_curve), run_time=2,)
+
+        for i in range(len(kochsnow_group) - 1):
+            self.play(ReplacementTransform(kochsnow_group[i], kochsnow_group[i + 1]))
+        self.wait()
+
+
+class KochCurve(KochSnowFlake):
+    axiom = "A--"
+
+
+class TestKochCurve(Scene):
+    def construct(self):
+        num = 3
+        kochcurve_group = [KochCurve() for i in range(num)]
+        # 实例化了一次之后这个实例在循环里面被调用时候应该使用copy方法复制一份
+        # 不然的话循环里面重复调用同一个实例化的物体势必会出问题
+        # 非要在循环里面重复调用同一个类的话应该重复实例化多次再加进去
+
+        for i in range(num):
+            kochcurve_group[i].order = i + 2
+            kochcurve_group[i].init_points()  # 原来父类里面写了怎么连线的方法，，大意了没有闪
+            # 下一次一定会好好看父类的！
+            kochcurve_group[i].init_colors()
+            # kochcurve_group[i].set_stroke(width=4)  # 设置曲线宽度为固定值
+
+        self.play(Create(kochcurve_group[0]))
+        self.wait()
+
+        for i in range(len(kochcurve_group) - 1):
+            self.play(ReplacementTransform(kochcurve_group[i], kochcurve_group[i + 1]))
+        self.wait()

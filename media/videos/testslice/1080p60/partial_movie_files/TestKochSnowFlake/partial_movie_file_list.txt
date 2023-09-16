@@ -1,0 +1,6 @@
+# This file is used internally by FFMPEG.
+file 'file:C:/Users/Feynman/Documents/00课件-2023春-2023秋/GitGubStatus/JuliaSetinManim/media/videos/testslice/1080p60/partial_movie_files/TestKochSnowFlake/1413466013_2974541953_223132457.mp4'
+file 'file:C:/Users/Feynman/Documents/00课件-2023春-2023秋/GitGubStatus/JuliaSetinManim/media/videos/testslice/1080p60/partial_movie_files/TestKochSnowFlake/1672018281_3315967912_3320668065.mp4'
+file 'file:C:/Users/Feynman/Documents/00课件-2023春-2023秋/GitGubStatus/JuliaSetinManim/media/videos/testslice/1080p60/partial_movie_files/TestKochSnowFlake/1672018281_3381047719_3516307457.mp4'
+file 'file:C:/Users/Feynman/Documents/00课件-2023春-2023秋/GitGubStatus/JuliaSetinManim/media/videos/testslice/1080p60/partial_movie_files/TestKochSnowFlake/1672018281_824252135_427568777.mp4'
+file 'file:C:/Users/Feynman/Documents/00课件-2023春-2023秋/GitGubStatus/JuliaSetinManim/media/videos/testslice/1080p60/partial_movie_files/TestKochSnowFlake/1672018281_3315967912_2145377460.mp4'

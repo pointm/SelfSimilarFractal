@@ -1,0 +1,8 @@
+# This file is used internally by FFMPEG.
+file 'file:C:/Users/Feynman/Documents/00课件-2023春-2023秋/GitGubStatus/JuliaSetinManim/media/videos/testslice/1080p60/partial_movie_files/TestTriangleFillingCurve/1413466013_2474433296_223132457.mp4'
+file 'file:C:/Users/Feynman/Documents/00课件-2023春-2023秋/GitGubStatus/JuliaSetinManim/media/videos/testslice/1080p60/partial_movie_files/TestTriangleFillingCurve/1672018281_3315967912_573724462.mp4'
+file 'file:C:/Users/Feynman/Documents/00课件-2023春-2023秋/GitGubStatus/JuliaSetinManim/media/videos/testslice/1080p60/partial_movie_files/TestTriangleFillingCurve/1672018281_1473762852_1530555076.mp4'
+file 'file:C:/Users/Feynman/Documents/00课件-2023春-2023秋/GitGubStatus/JuliaSetinManim/media/videos/testslice/1080p60/partial_movie_files/TestTriangleFillingCurve/1672018281_3549977304_1811227542.mp4'
+file 'file:C:/Users/Feynman/Documents/00课件-2023春-2023秋/GitGubStatus/JuliaSetinManim/media/videos/testslice/1080p60/partial_movie_files/TestTriangleFillingCurve/1672018281_2226172272_2075138904.mp4'
+file 'file:C:/Users/Feynman/Documents/00课件-2023春-2023秋/GitGubStatus/JuliaSetinManim/media/videos/testslice/1080p60/partial_movie_files/TestTriangleFillingCurve/1672018281_2023562656_174829874.mp4'
+file 'file:C:/Users/Feynman/Documents/00课件-2023春-2023秋/GitGubStatus/JuliaSetinManim/media/videos/testslice/1080p60/partial_movie_files/TestTriangleFillingCurve/1672018281_3315967912_1600081400.mp4'

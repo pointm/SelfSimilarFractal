@@ -1,4 +1,4 @@
 # This file is used internally by FFMPEG.
-file 'file:C:/Users/Feynman/Documents/00课件-2023春-2023秋/GitGubStatus/JuliaSetinManim/media/videos/testslice/1080p60/partial_movie_files/TestSetPoints/1413466013_3290061804_3653530899.mp4'
-file 'file:C:/Users/Feynman/Documents/00课件-2023春-2023秋/GitGubStatus/JuliaSetinManim/media/videos/testslice/1080p60/partial_movie_files/TestSetPoints/1672018281_3315967912_1261330540.mp4'
-file 'file:C:/Users/Feynman/Documents/00课件-2023春-2023秋/GitGubStatus/JuliaSetinManim/media/videos/testslice/1080p60/partial_movie_files/TestSetPoints/1672018281_1796936348_1687956830.mp4'
+file 'file:C:/Users/Feynman/Documents/00课件-2023春-2023秋/GitGubStatus/JuliaSetinManim/media/videos/testslice/1080p60/partial_movie_files/TestSetPoints/1413466013_2767007425_3653530899.mp4'
+file 'file:C:/Users/Feynman/Documents/00课件-2023春-2023秋/GitGubStatus/JuliaSetinManim/media/videos/testslice/1080p60/partial_movie_files/TestSetPoints/1672018281_3315967912_1180550194.mp4'
+file 'file:C:/Users/Feynman/Documents/00课件-2023春-2023秋/GitGubStatus/JuliaSetinManim/media/videos/testslice/1080p60/partial_movie_files/TestSetPoints/1672018281_1796936348_3455615582.mp4'
