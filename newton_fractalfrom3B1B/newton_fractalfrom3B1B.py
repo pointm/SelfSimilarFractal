@@ -1,11 +1,12 @@
-# from manim_imports_ext import *
+from manim_imports_ext import *
 
-# from _2022.quintic import coefficients_to_roots
-# from _2022.quintic import roots_to_coefficients
-# from _2022.quintic import dpoly
-# from _2022.quintic import poly
+from roots_and_coefs import coefficients_to_roots
+from roots_and_coefs import roots_to_coefficients
+from roots_and_coefs import dpoly
+from roots_and_coefs import poly
 
 from manim import *
+import itertools as it
 
 ROOT_COLORS_BRIGHT = [RED, GREEN, BLUE, YELLOW, MAROON_B]
 ROOT_COLORS_DEEP = ["#440154", "#3b528b", "#21908c", "#5dc963", "#29abca"]
@@ -13,10 +14,9 @@ CUBIC_COLORS = [RED_E, TEAL_E, BLUE_E]
 
 
 def glow_dot(point, r_min=0.05, r_max=0.15, color=YELLOW, n=20, opacity_mult=1.0):
-    result = VGroup(*(
-        Dot(point, radius=interpolate(r_min, r_max, a))
-        for a in np.linspace(0, 1, n)
-    ))
+    result = VGroup(
+        *(Dot(point, radius=interpolate(r_min, r_max, a)) for a in np.linspace(0, 1, n))
+    )
     result.set_fill(color, opacity=opacity_mult / n)
     return result
 
@@ -24,11 +24,9 @@ def glow_dot(point, r_min=0.05, r_max=0.15, color=YELLOW, n=20, opacity_mult=1.0
 def get_newton_rule(font_size=36, var="z", **kwargs):
     terms = [f"{var}_n", f"{var}_{{n + 1}}"]
     t0, t1 = terms
-    return OldTex(
-        t1, "=", t0, "-",
-        "{P(", t0, ")", "\\over ", "P'(", t0, ")}",
-        font_size=36,
-        **kwargs
+    return Tex(
+        "z_{n+1} = z_n - {P(z_n) \\over P'(z_n)}",
+        tex_template=TexTemplateLibrary.tex,
     )
 
 
@@ -70,11 +68,31 @@ def get_figure(image_name, person_name, year_text, height=3, label_direction=DOW
     return Group(rect, image, name, year_label)
 
 
+"""
+这是一个用Python编写的类，用于绘制牛顿分形。牛顿分形是一种复平面上的边界集合，由牛顿法应用于一个固定的多项式或超越函数得到。这个类继承了Mobject类，是Manim库中的基本图形对象。下面是这个类的代码解释：
+
+CONFIG是一个字典，用于存储这个类的一些配置参数，比如着色器文件夹、着色器数据类型、颜色、多项式系数、缩放因子、偏移量、迭代步数、朱利亚高亮、最大次数、饱和度因子、不透明度、是否显示周期点为黑色、是否是参数空间等。
+__init__是一个构造函数，用于初始化这个类的实例。它接受一个平面对象作为参数，并调用父类的构造函数，传入一些配置参数。然后它用平面对象替换自身的位置和大小，以适应平面的范围。
+init_data是一个初始化数据的方法，用于设置这个类的点属性。它将四个角点（左上、左下、右上、右下）作为这个类的点，以构成一个矩形。
+init_uniforms是一个初始化着色器变量的方法，用于设置这个类的着色器属性。它调用父类的同名方法，并设置颜色、朱利亚高亮、多项式系数、缩放因子、偏移量、迭代步数、饱和度因子、不透明度等变量。它还将是否显示周期点为黑色和是否是参数空间转换为浮点数，并存入着色器变量中。
+set_colors是一个设置颜色的方法，用于更新这个类的颜色属性。它接受一个颜色列表作为参数，并将每个颜色转换为RGBA格式，存入着色器变量中。它返回自身，以便链式调用。
+set_julia_highlight是一个设置朱利亚高亮的方法，用于更新这个类的朱利亚高亮属性。它接受一个浮点数作为参数，并存入着色器变量中。它返回自身，以便链式调用。
+set_coefs是一个设置多项式系数的方法，用于更新这个类的多项式系数属性。它接受一个系数列表作为参数，并将其补全到最大次数+1个元素。然后它将每个系数转换为复数，并将其实部和虚部存入着色器变量中。它还接受一个布尔值作为参数，表示是否重置根属性。如果是，则调用set_roots方法，根据系数计算根并更新根属性。最后它更新自身的系数属性，并返回自身。
+set_roots是一个设置根的方法，用于更新这个类的根属性。它接受一个根列表作为参数，并将其补全到最大次数个元素。然后它将每个根转换为复数，并将其实部和虚部存入着色器变量中。它还更新着色器变量中的根数量。它还接受一个布尔值作为参数，表示是否重置系数属性。如果是，则调用set_coefs方法，根据根计算系数并更新系数属性。最后它更新自身的根属性，并返回自身。
+set_scale是一个设置缩放因子的方法，用于更新这个类的缩放因子属性。它接受一个浮点数作为参数，并存入着色器变量中。它返回自身，以便链式调用。
+set_offset是一个设置偏移量的方法，用于更新这个类的偏移量属性。它接受一个三维向量作为参数，并存入着色器变量中。它返回自身，以便链式调用。
+set_n_steps是一个设置迭代步数的方法，用于更新这个类的迭代步数属性。它接受一个浮点数作为参数，并存入着色器变量中。它返回自身，以便链式调用。
+set_saturation_factor是一个设置饱和度因子的方法，用于更新这个类的饱和度因子属性。它接受一个浮点数作为参数，并存入着色器变量中。它返回自身，以便链式调用。
+set_opacities是一个设置不透明度的方法，用于更新这个类的不透明度属性。它接受一系列浮点数作为参数，并将其分别存入着色器变量中对应的颜色的第四个元素中。它返回自身，以便链式调用。
+set_opacity是一个设置不透明度的方法，用于更新这个类的不透明度属性。它接受一个浮点数和一个布尔值作为参数，并将其作为参数传入set_opacities方法，将所有颜色的不透明度设置为相同的值。它返回自身，以便链式调用。
+"""
+
+
 class NewtonFractal(Mobject):
     CONFIG = {
         "shader_folder": "newton_fractal",
         "shader_dtype": [
-            ('point', np.float32, (3,)),
+            ("point", np.float32, (3,)),
         ],
         "colors": ROOT_COLORS_DEEP,
         "coefs": [1.0, -1.0, 1.0, 0.0, 0.0, 1.0],
@@ -114,10 +132,12 @@ class NewtonFractal(Mobject):
         self.uniforms["is_parameter_space"] = float(self.is_parameter_space)
 
     def set_colors(self, colors):
-        self.uniforms.update({
-            f"color{n}": np.array(color_to_rgba(color))
-            for n, color in enumerate(colors)
-        })
+        self.uniforms.update(
+            {
+                f"color{n}": np.array(color_to_rgba(color))
+                for n, color in enumerate(colors)
+            }
+        )
         return self
 
     def set_julia_highlight(self, value):
@@ -125,10 +145,12 @@ class NewtonFractal(Mobject):
 
     def set_coefs(self, coefs, reset_roots=True):
         full_coefs = [*coefs] + [0] * (self.max_degree - len(coefs) + 1)
-        self.uniforms.update({
-            f"coef{n}": np.array([coef.real, coef.imag], dtype=np.float64)
-            for n, coef in enumerate(map(complex, full_coefs))
-        })
+        self.uniforms.update(
+            {
+                f"coef{n}": np.array([coef.real, coef.imag], dtype=np.float64)
+                for n, coef in enumerate(map(complex, full_coefs))
+            }
+        )
         if reset_roots:
             self.set_roots(coefficients_to_roots(coefs), False)
         self.coefs = coefs
@@ -137,10 +159,12 @@ class NewtonFractal(Mobject):
     def set_roots(self, roots, reset_coefs=True):
         self.uniforms["n_roots"] = float(len(roots))
         full_roots = [*roots] + [0] * (self.max_degree - len(roots))
-        self.uniforms.update({
-            f"root{n}": np.array([root.real, root.imag], dtype=np.float64)
-            for n, root in enumerate(map(complex, full_roots))
-        })
+        self.uniforms.update(
+            {
+                f"root{n}": np.array([root.real, root.imag], dtype=np.float64)
+                for n, root in enumerate(map(complex, full_roots))
+            }
+        )
         if reset_coefs:
             self.set_coefs(roots_to_coefficients(roots), False)
         self.roots = roots
@@ -223,18 +247,14 @@ class PragmaticOrigins(Scene):
             background_line_style={
                 "stroke_color": GREY_A,
                 "stroke_width": 1,
-            }
+            },
         )
         axes.set_height(5.0)
         axes.to_corner(DL)
         axes.shift(0.5 * UP)
 
         coefs = np.array([2, -3, 1, -2, -1, 1], dtype=np.float)
-        roots = [
-            r.real
-            for r in coefficients_to_roots(coefs)
-            if abs(r.imag) < 1e-2
-        ]
+        roots = [r.real for r in coefficients_to_roots(coefs) if abs(r.imag) < 1e-2]
         roots.sort()
         coefs *= 0.2
 
@@ -244,15 +264,9 @@ class PragmaticOrigins(Scene):
         expr.match_width(axes)
         expr.next_to(axes, DOWN)
         graph_x_range = (-2, 2.4)
-        graph = axes.get_graph(
-            lambda x: poly(x, coefs),
-            x_range=graph_x_range
-        )
+        graph = axes.get_graph(lambda x: poly(x, coefs), x_range=graph_x_range)
         graph.set_stroke(BLUE, [0, *50 * [4], 0])
-        root_dots = VGroup(*(
-            glow_dot(axes.c2p(root, 0))
-            for root in roots
-        ))
+        root_dots = VGroup(*(glow_dot(axes.c2p(root, 0)) for root in roots))
         root_eqs = VGroup()
         root_groups = VGroup()
         for i, root, dot in zip(it.count(1), roots, root_dots):
@@ -275,14 +289,17 @@ class PragmaticOrigins(Scene):
         if self.include_pi:
             morty = Mortimer(height=2)
             morty.to_corner(DR)
-            self.play(PiCreatureSays(
-                morty, "How do you\nfind theses?",
-                target_mode="tease",
-                bubble_config={
-                    "width": 4,
-                    "height": 2.5,
-                }
-            ))
+            self.play(
+                PiCreatureSays(
+                    morty,
+                    "How do you\nfind theses?",
+                    target_mode="tease",
+                    bubble_config={
+                        "width": 4,
+                        "height": 2.5,
+                    },
+                )
+            )
 
         # Animations
         self.add(underline, title)
@@ -295,10 +312,7 @@ class PragmaticOrigins(Scene):
         self.play(
             ShowCreation(graph, rate_func=linear),
             *(
-                FadeIn(
-                    rg,
-                    rate_func=squish_rate_func(rush_from, a, min(a + 0.2, 1))
-                )
+                FadeIn(rg, rate_func=squish_rate_func(rush_from, a, min(a + 0.2, 1)))
                 for rg, a in zip(root_groups, alphas)
             ),
             run_time=4,
@@ -340,48 +354,54 @@ class WhoCares(TeacherStudentsScene):
         self.add(image)
 
         self.wait()
-        self.play(LaggedStart(
-            PiCreatureSays(
-                self.students[1], "Ooh, quintics...",
-                target_mode="thinking",
-                look_at=self.screen,
-                bubble_config={
-                    "direction": LEFT,
-                    "width": 4,
-                    "height": 2,
-                }
-            ),
-            self.teacher.change("happy"),
-            self.students[0].change("thinking", screen),
-            self.students[2].change("sassy", screen),
-            lag_ratio=0.1,
-        ))
+        self.play(
+            LaggedStart(
+                PiCreatureSays(
+                    self.students[1],
+                    "Ooh, quintics...",
+                    target_mode="thinking",
+                    look_at=self.screen,
+                    bubble_config={
+                        "direction": LEFT,
+                        "width": 4,
+                        "height": 2,
+                    },
+                ),
+                self.teacher.change("happy"),
+                self.students[0].change("thinking", screen),
+                self.students[2].change("sassy", screen),
+                lag_ratio=0.1,
+            )
+        )
         self.wait(3)
-        self.play(LaggedStart(
-            PiCreatureSays(
-                self.students[2], "Who cares?",
-                target_mode="tired",
-                bubble_config={
-                    "direction": LEFT,
-                    "width": 4,
-                    "height": 3,
-                }
-            ),
-            self.teacher.change("guilty"),
-            self.students[0].change("confused", screen),
-            RemovePiCreatureBubble(
-                self.students[1],
-                look_at=self.students[2].eyes,
-                target_mode="erm",
-            ),
-            lag_ratio=0.1,
-        ))
+        self.play(
+            LaggedStart(
+                PiCreatureSays(
+                    self.students[2],
+                    "Who cares?",
+                    target_mode="tired",
+                    bubble_config={
+                        "direction": LEFT,
+                        "width": 4,
+                        "height": 3,
+                    },
+                ),
+                self.teacher.change("guilty"),
+                self.students[0].change("confused", screen),
+                RemovePiCreatureBubble(
+                    self.students[1],
+                    look_at=self.students[2].eyes,
+                    target_mode="erm",
+                ),
+                lag_ratio=0.1,
+            )
+        )
         self.wait(2)
         self.teacher_says(
             "Who doesn't",
             target_mode="hooray",
             bubble_config={"height": 3, "width": 4},
-            added_anims=[self.change_students("pondering", "pondering", "confused")]
+            added_anims=[self.change_students("pondering", "pondering", "confused")],
         )
         self.wait(3)
 
@@ -409,15 +429,19 @@ class SphereExample(Scene):
         self.add(axes)
         self.add(sphere)
 
-        frame.add_updater(
-            lambda m, dt: m.increment_theta(1 * dt * DEGREES)
-        )
+        frame.add_updater(lambda m, dt: m.increment_theta(1 * dt * DEGREES))
 
         # Expression
         equation = OldTex(
-            "1.00", "\\,x^2", "+",
-            "1.00", "\\,y^2", "+",
-            "1.00", "\\,z^2", "=",
+            "1.00",
+            "\\,x^2",
+            "+",
+            "1.00",
+            "\\,y^2",
+            "+",
+            "1.00",
+            "\\,z^2",
+            "=",
             "1.00",
         )
         decimals = VGroup()
@@ -438,21 +462,21 @@ class SphereExample(Scene):
             ChangeDecimalToValue(decimals[3], 9.0),
             VFadeInThenOut(SurroundingRectangle(decimals[3]).fix_in_frame()),
             sphere.animate.scale(3),
-            run_time=3
+            run_time=3,
         )
         self.wait()
         self.play(
             ChangeDecimalToValue(decimals[2], 4.0),
             VFadeInThenOut(SurroundingRectangle(decimals[2]).fix_in_frame()),
             sphere.animate.stretch(0.5, 2),
-            run_time=3
+            run_time=3,
         )
         self.wait()
         self.play(
             ChangeDecimalToValue(decimals[0], 9.0),
             VFadeInThenOut(SurroundingRectangle(decimals[0]).fix_in_frame()),
             sphere.animate.stretch(1 / 3, 0),
-            run_time=3
+            run_time=3,
         )
         self.wait(10)
 
@@ -516,12 +540,14 @@ class CurvesDefiningFonts(Scene):
             lines = VGroup()
             for a1, h, a2 in char.get_bezier_tuples():
                 for pair in (a1, h), (h, a2):
-                    lines.add(Line(
-                        *pair,
-                        stroke_width=0.25,
-                        # dash_length=0.0025,
-                        stroke_color=YELLOW,
-                    ))
+                    lines.add(
+                        Line(
+                            *pair,
+                            stroke_width=0.25,
+                            # dash_length=0.0025,
+                            stroke_color=YELLOW,
+                        )
+                    )
                 for point in (a1, h, a2):
                     dots.add(Dot(point, radius=0.005))
             dot_groups.add(dots)
@@ -551,8 +577,8 @@ class CurvesDefiningFonts(Scene):
             run_time=5,
         )
         for group in (line_groups, dot_groups):
-            group.remove(*group[0:char_index - 1])
-            group.remove(*group[char_index + 2:])
+            group.remove(*group[0 : char_index - 1])
+            group.remove(*group[char_index + 2 :])
         self.wait()
 
         # Pull out one curve
@@ -560,8 +586,8 @@ class CurvesDefiningFonts(Scene):
 
         index = 26
         curve = char[index]
-        sublines = lines[2 * index:2 * index + 2]
-        subdots = dots[3 * index:3 * index + 3]
+        sublines = lines[2 * index : 2 * index + 2]
+        subdots = dots[3 * index : 3 * index + 3]
 
         curve_group = VGroup(curve, sublines, subdots)
         curve_group.set_stroke(background=True)
@@ -573,10 +599,7 @@ class CurvesDefiningFonts(Scene):
         for dot in curve_group.target[2]:
             dot.scale(1 / 2)
 
-        labels = VGroup(*(
-            OldTex(f"P_{i}").set_height(0.05)
-            for i in range(3)
-        ))
+        labels = VGroup(*(OldTex(f"P_{i}").set_height(0.05) for i in range(3)))
         for label, dot, vect in zip(labels, curve_group.target[2], [LEFT, UP, UP]):
             label.insert_n_curves(20)
             label.next_to(dot, vect, buff=0.025)
@@ -584,10 +607,7 @@ class CurvesDefiningFonts(Scene):
 
         self.play(
             MoveToTarget(curve_group),
-            *(
-                GrowFromPoint(label, curve_group.get_center())
-                for label in labels
-            )
+            *(GrowFromPoint(label, curve_group.get_center()) for label in labels),
         )
 
         equation = OldTex(
@@ -596,7 +616,7 @@ class CurvesDefiningFonts(Scene):
                 "P_0": BLUE,
                 "P_1": BLUE,
                 "P_2": BLUE,
-            }
+            },
         )
         equation.set_height(0.07)
         equation.next_to(curve_group, RIGHT, buff=0.25)
@@ -608,7 +628,7 @@ class CurvesDefiningFonts(Scene):
         poly_label.apply_function(
             lambda p: [
                 p[0],
-                p[1] - 0.2 * p[0]**2,
+                p[1] - 0.2 * p[0] ** 2,
                 p[2],
             ]
         )
@@ -620,17 +640,19 @@ class CurvesDefiningFonts(Scene):
 
         self.play(
             ShowCreationThenDestruction(curve.copy().set_color(PINK), run_time=2),
-            Write(poly_label, stroke_width=0.5)
+            Write(poly_label, stroke_width=0.5),
         )
         self.play(
-            LaggedStart(*(
-                TransformFromCopy(
-                    labels[i],
-                    equation.get_part_by_tex(f"P_{i}").copy(),
-                    remover=True
+            LaggedStart(
+                *(
+                    TransformFromCopy(
+                        labels[i],
+                        equation.get_part_by_tex(f"P_{i}").copy(),
+                        remover=True,
+                    )
+                    for i in range(3)
                 )
-                for i in range(3)
-            )),
+            ),
             FadeIn(equation, rate_func=squish_rate_func(smooth, 0.5, 1)),
             run_time=2,
         )
@@ -682,10 +704,7 @@ class RasterizingBezier(Scene):
 
         def update_pixels(pixels):
             for pixel in pixels:
-                pixel.set_fill(
-                    YELLOW,
-                    0.5 * clip(10 * (get_sw() - pixel.dist), 0, 1)
-                )
+                pixel.set_fill(YELLOW, 0.5 * clip(10 * (get_sw() - pixel.dist), 0, 1))
 
         update_pixels(pixels)
 
@@ -700,7 +719,7 @@ class RasterizingBezier(Scene):
             FadeIn(fake_pixels),
             ShowCreation(pixels),
             lag_ratio=10 / len(pixels),
-            run_time=4
+            run_time=4,
         )
         self.remove(thick_curve)
         self.wait()
@@ -739,9 +758,12 @@ class RasterizingBezier(Scene):
         ct[1].add_updater(lambda m: m.set_value(get_t()))
         ct[1].next_to(ct[0], RIGHT, buff=0)
         P_dot.add_updater(lambda m: m.move_to(curve.pfp(get_t() / 2)))
-        ct.add_updater(lambda m: m.move_to(P_dot).shift(
-            (0.3 - 0.5 * get_t() * (1 - get_t())) * rotate_vector(np.array([-3, 1, 0]), -0.8 * get_t() * PI)
-        ))
+        ct.add_updater(
+            lambda m: m.move_to(P_dot).shift(
+                (0.3 - 0.5 * get_t() * (1 - get_t()))
+                * rotate_vector(np.array([-3, 1, 0]), -0.8 * get_t() * PI)
+            )
+        )
         curve_copy = curve.copy()
         curve_copy.pointwise_become_partial(curve, 0, 0.5)
         curve_copy.set_points(curve_copy.get_points_without_null_curves())
@@ -767,19 +789,18 @@ class RasterizingBezier(Scene):
         t_tracker = ValueTracker(0)
         dist_line = Line()
         dist_line.set_stroke(TEAL, 5)
-        dist_line.add_updater(lambda l: l.put_start_and_end_on(
-            pixel.get_center(),
-            curve_copy.pfp(t_tracker.get_value())
-        ))
+        dist_line.add_updater(
+            lambda l: l.put_start_and_end_on(
+                pixel.get_center(), curve_copy.pfp(t_tracker.get_value())
+            )
+        )
 
         dist_lines = VGroup()
         graph_v_lines = VGroup()
         for t in np.linspace(0, 1, 20):
             t_tracker.set_value(t)
             dist_lines.add(dist_line.update().copy().clear_updaters())
-            graph_v_lines.add(axes.get_v_line(
-                axes.input_to_graph_point(t, graph)
-            ))
+            graph_v_lines.add(axes.get_v_line(axes.input_to_graph_point(t, graph)))
         dist_lines.set_stroke(RED, 1, opacity=1.0)
         graph_v_lines.set_stroke(RED, 1, opacity=1.0)
         t_tracker.set_value(0)
@@ -790,7 +811,7 @@ class RasterizingBezier(Scene):
         self.play(
             FadeIn(dist_lines, lag_ratio=1),
             FadeIn(graph_v_lines, lag_ratio=1),
-            run_time=4
+            run_time=4,
         )
         self.wait()
         t_tracker.set_value(0.0)
@@ -820,21 +841,19 @@ class RasterizingBezier(Scene):
         get_t = t_tracker.get_value
         tan_line = always_redraw(
             lambda: axes.get_tangent_line(
-                get_t(), graph, length=3,
+                get_t(),
+                graph,
+                length=3,
             ).set_stroke(
                 color=MAROON_B,
                 width=1.0,
-                opacity=clip(20 * get_t() * (1 - get_t()), 0, 1)
+                opacity=clip(20 * get_t() * (1 - get_t()), 0, 1),
             )
         )
 
         self.play(*map(FadeIn, deriv_graph_group[:-1]))
         self.add(tan_line)
-        self.play(
-            t_tracker.animate.set_value(1),
-            ShowCreation(d_graph),
-            run_time=4
-        )
+        self.play(t_tracker.animate.set_value(1), ShowCreation(d_graph), run_time=4)
         self.remove(tan_line)
         self.wait()
 
@@ -846,8 +865,7 @@ class RasterizingBezier(Scene):
         question = Text("What is\nthis value?", font_size=30)
         question.to_corner(DR)
         arrow = Arrow(
-            question.get_left(), min_line.get_bottom(), stroke_width=3,
-            buff=0.1
+            question.get_left(), min_line.get_bottom(), stroke_width=3, buff=0.1
         )
 
         self.play(ShowCreation(min_line))
@@ -863,7 +881,7 @@ class RasterizingBezier(Scene):
             y_range=(0, 20, 5),
             height=3,
             width=5,
-            axis_config={"include_tip": False}
+            axis_config={"include_tip": False},
         )
         axes.to_corner(UR, buff=SMALL_BUFF)
         y_label = OldTex(
@@ -876,9 +894,10 @@ class RasterizingBezier(Scene):
         y_label.next_to(axes.y_axis.get_top(), RIGHT, aligned_edge=UP)
         y_label.shift_onto_screen(buff=MED_SMALL_BUFF)
 
-        graph = axes.get_graph(lambda t: get_norm(
-            pixel.get_center() - curve.pfp(interpolate(*t_range, t))
-        )**2)
+        graph = axes.get_graph(
+            lambda t: get_norm(pixel.get_center() - curve.pfp(interpolate(*t_range, t)))
+            ** 2
+        )
         graph.set_stroke(RED, 2)
 
         bg_rect = BackgroundRectangle(axes, buff=SMALL_BUFF)
@@ -894,7 +913,7 @@ class RasterizingBezier(Scene):
             y_range=(-60, 60, 10),
             height=top_axes.get_height(),
             width=top_axes.get_width(),
-            axis_config={"include_tip": False}
+            axis_config={"include_tip": False},
         )
         axes.to_corner(DR, buff=SMALL_BUFF)
         axes.shift((top_axes.c2p(0, 0) - axes.c2p(0, 0))[0] * RIGHT)
@@ -935,8 +954,7 @@ class DontWorryAboutDetails(TeacherStudentsScene):
         screen.set_height(4, about_edge=UL)
         screen.set_fill(BLACK, 1)
         image1, image2 = [
-            ImageMobject(f"RasterizingBezier_{i}").replace(screen)
-            for i in range(1, 3)
+            ImageMobject(f"RasterizingBezier_{i}").replace(screen) for i in range(1, 3)
         ]
 
         frame = self.camera.frame
@@ -955,7 +973,7 @@ class DontWorryAboutDetails(TeacherStudentsScene):
             added_anims=[
                 self.students[0].change("confused", image1),
                 self.students[1].change("confused", image1),
-            ]
+            ],
         )
         self.play(self.teacher.change("tease"))
         self.wait(2)
@@ -973,14 +991,14 @@ class DontWorryAboutDetails(TeacherStudentsScene):
                 "width": 4,
                 "height": 3,
             },
-            added_anims=[self.change_students("confused", "maybe", "pondering")]
+            added_anims=[self.change_students("confused", "maybe", "pondering")],
         )
         self.wait()
         self.look_at(image1)
         self.play(
             frame.animate.replace(image1),
             RemovePiCreatureBubble(self.teacher),
-            run_time=2
+            run_time=2,
         )
         self.wait()
 
@@ -999,11 +1017,13 @@ class DontWorryAboutDetails(TeacherStudentsScene):
             bubble_config={
                 "width": 3,
                 "height": 3,
-            }
+            },
         )
         self.wait(4)
         self.play(
-            RemovePiCreatureBubble(self.teacher, target_mode="raise_right_hand", look_at=image1),
+            RemovePiCreatureBubble(
+                self.teacher, target_mode="raise_right_hand", look_at=image1
+            ),
             self.change_students(
                 *3 * ["pondering"],
                 look_at=image1,
@@ -1025,14 +1045,15 @@ class ShowManyGraphs(Scene):
         coef_groups = list(map(roots_to_coefficients, root_groups))
         scalars = [0.5, 0.2, 0.01, -0.01]
         colors = [BLUE_C, BLUE_D, BLUE_B, RED]
-        plots = Group(*(
-            self.get_plot(coefs, scalar, color)
-            for coefs, scalar, color in zip(coef_groups, scalars, colors)
-        ))
+        plots = Group(
+            *(
+                self.get_plot(coefs, scalar, color)
+                for coefs, scalar, color in zip(coef_groups, scalars, colors)
+            )
+        )
         plots.arrange_in_grid(v_buff=0.5)
         axes, graphs, root_dots = [
-            Group(*(plot[i] for plot in plots))
-            for i in range(3)
+            Group(*(plot[i] for plot in plots)) for i in range(3)
         ]
 
         self.play(
@@ -1041,10 +1062,9 @@ class ShowManyGraphs(Scene):
             run_time=3,
         )
         self.play(
-            LaggedStart(*(
-                FadeIn(dot, scale=0.1)
-                for dot in it.chain(*root_dots)
-            ), lag_ratio=0.1)
+            LaggedStart(
+                *(FadeIn(dot, scale=0.1) for dot in it.chain(*root_dots)), lag_ratio=0.1
+            )
         )
 
         self.add(plots)
@@ -1055,29 +1075,30 @@ class ShowManyGraphs(Scene):
             plot.save_state()
 
         # Show quadratic
-        kw = {"tex_to_color_map": {
-            "{a}": BLUE_B,
-            "{b}": BLUE_C,
-            "{c}": BLUE_D,
-            "{d}": TEAL_E,
-            "{e}": TEAL_D,
-            "{f}": TEAL_C,
-            "{p}": BLUE_B,
-            "{q}": BLUE_C,
-            "\\text{root}": YELLOW,
-            "r_1": YELLOW,
-            "r_2": YELLOW,
-            "+": WHITE,
-            "-": WHITE,
-        }}
+        kw = {
+            "tex_to_color_map": {
+                "{a}": BLUE_B,
+                "{b}": BLUE_C,
+                "{c}": BLUE_D,
+                "{d}": TEAL_E,
+                "{e}": TEAL_D,
+                "{f}": TEAL_C,
+                "{p}": BLUE_B,
+                "{q}": BLUE_C,
+                "\\text{root}": YELLOW,
+                "r_1": YELLOW,
+                "r_2": YELLOW,
+                "+": WHITE,
+                "-": WHITE,
+            }
+        }
         quadratic.generate_target()
         quadratic.target.set_height(6)
         quadratic.target.center().to_edge(LEFT)
         equation = OldTex("{a}x^2 + {b}x + {c} = 0", **kw)
         equation.next_to(quadratic.target, UP)
         form = OldTex(
-            "r_1, r_2 = {-{b} \\pm \\sqrt{\\,{b}^2 - 4{a}{c}} \\over 2{a}}",
-            **kw
+            "r_1, r_2 = {-{b} \\pm \\sqrt{\\,{b}^2 - 4{a}{c}} \\over 2{a}}", **kw
         )
         form.next_to(quadratic.target, RIGHT, buff=MED_LARGE_BUFF)
         form_name = Text("Quadratic formula")
@@ -1099,10 +1120,7 @@ class ShowManyGraphs(Scene):
         self.play(randy.change("hooray"))
         self.play(
             TransformMatchingShapes(
-                VGroup(*(
-                    equation.get_part_by_tex(f"{{{c}}}")
-                    for c in "abc"
-                )).copy(),
+                VGroup(*(equation.get_part_by_tex(f"{{{c}}}") for c in "abc")).copy(),
                 form,
                 lag_ratio=0,
                 run_time=2,
@@ -1158,10 +1176,11 @@ class ShowManyGraphs(Scene):
         self.play(
             ShowIncreasingSubsets(over_trillion, run_time=1),
             randy.change("thinking", over_trillion),
-            LaggedStart(*(
-                FadeOut(form_copy, 4 * DOWN)
-                for form_copy in form_copies
-            ), lag_ratio=0.15, run_time=5)
+            LaggedStart(
+                *(FadeOut(form_copy, 4 * DOWN) for form_copy in form_copies),
+                lag_ratio=0.15,
+                run_time=5,
+            ),
         )
         self.play(
             FadeOut(over_trillion),
@@ -1186,7 +1205,8 @@ class ShowManyGraphs(Scene):
         cubic_name = OldTexText("Cubic\\\\", "Formula")
         cubic_name.to_corner(UL)
         cubic_form = OldTex(
-            "\\text{root}", "=",
+            "\\text{root}",
+            "=",
             "\\sqrt[3]{\\,-{{q} \\over 2} + \\sqrt{\\, {{q}^2 \\over 4} + {{p}^3 \\over 27}} }+",
             "\\sqrt[3]{\\,-{{q} \\over 2} - \\sqrt{\\, {{q}^2 \\over 4} + {{p}^3 \\over 27}} }",
             **kw,
@@ -1195,7 +1215,8 @@ class ShowManyGraphs(Scene):
         cubic_form.next_to(cubic_eq, DOWN, buff=1.25)
         cubic_form.to_edge(LEFT)
         cubic_arrow = Arrow(
-            cubic_eq, cubic_form,
+            cubic_eq,
+            cubic_form,
             stroke_width=5,
             buff=0.1,
         )
@@ -1231,8 +1252,11 @@ class ShowManyGraphs(Scene):
         quartic_eq = OldTex("{a}x^4 + {b}x^3 + {c}x^2 + {d}x + {e} = 0", **kw)
         quartic_eq.next_to(quartic, UP)
 
-        main_form = OldTex(r"r_{i}&=-\frac{b}{4 a}-S \pm \frac{1}{2} \sqrt{-4 S^{2}-2 p \pm \frac{q}{S}}")
-        details = OldTex(r"""
+        main_form = OldTex(
+            r"r_{i}&=-\frac{b}{4 a}-S \pm \frac{1}{2} \sqrt{-4 S^{2}-2 p \pm \frac{q}{S}}"
+        )
+        details = OldTex(
+            r"""
             &\text{Where}\\\\
             p&=\frac{8 a c-3 b^{2}}{8 a^{2}} \qquad \qquad\\\\
             q&=\frac{b^{3}-4 a b c+8 a^{2} d}{8 a^{3}}\\\\
@@ -1240,7 +1264,8 @@ class ShowManyGraphs(Scene):
             Q&=\sqrt[3]{\frac{\Delta_{1}+\sqrt{\Delta_{1}^{2}-4 \Delta_{0}^{3}}}{2}}\\\\
             \Delta_{0}&=c^{2}-3 b d+12 a e\\\\
             \Delta_{1}&=2 c^{3}-9 b c d+27 b^{2} e+27 a d^{2}-72 a c e\\\\
-        """)
+        """
+        )
         main_form.match_width(quartic_eq)
         main_form.move_to(VGroup(quartic_name, quartic_eq))
         details.scale(0.5)
@@ -1260,10 +1285,7 @@ class ShowManyGraphs(Scene):
         )
         self.play(Write(main_form))
         self.wait()
-        self.play(
-            randy.change("horrified", details),
-            Write(details, run_time=5)
-        )
+        self.play(randy.change("horrified", details), Write(details, run_time=5))
         self.play(randy.animate.look_at(details.get_bottom()))
         self.play(Blink(randy))
         self.wait()
@@ -1272,10 +1294,7 @@ class ShowManyGraphs(Scene):
         quintic.generate_target()
         quintic.target.set_height(5)
         quintic.target.to_corner(UL).shift(DOWN)
-        quintic_eq = OldTex(
-            "{a}x^5 + {b}x^4 + {c}x^3 + {d}x^2 + {e}x + {f}",
-            **kw
-        )
+        quintic_eq = OldTex("{a}x^5 + {b}x^4 + {c}x^3 + {d}x^2 + {e}x + {f}", **kw)
         quintic_eq.match_width(quintic.target)
         quintic_eq.next_to(quintic.target, UP)
         quintic_name = Text("Quintic formula?", font_size=60)
@@ -1336,19 +1355,22 @@ class ShowManyGraphs(Scene):
         self.play(
             FadeIn(subwords[0][1]),
             LaggedStartMap(FadeIn, footnote, run_time=6, lag_ratio=0.5),
-            randy.change("pondering", footnote)
+            randy.change("pondering", footnote),
         )
         self.play(Blink(randy))
         self.wait()
 
-    def get_plot(self, coefs, scalar=1.0, color=YELLOW, stroke_width=3, height=3.5, bound=10):
+    def get_plot(
+        self, coefs, scalar=1.0, color=YELLOW, stroke_width=3, height=3.5, bound=10
+    ):
         axes = NumberPlane(
-            (-bound, bound, 5), (-bound, bound, 5),
+            (-bound, bound, 5),
+            (-bound, bound, 5),
             faded_line_ratio=4,
             background_line_style={
                 "stroke_width": 1.0,
                 "stroke_color": GREY_A,
-            }
+            },
         )
         axes.set_height(height)
         axes.add_coordinate_labels(
@@ -1361,11 +1383,12 @@ class ShowManyGraphs(Scene):
         def f(x):
             return scalar * poly(x, coefs)
 
-        x_min = binary_search(
-            lambda x: abs(f(x)), bound, -bound, 0
-        )
+        x_min = binary_search(lambda x: abs(f(x)), bound, -bound, 0)
         x_max = binary_search(
-            lambda x: abs(f(x)), bound, 0, bound,
+            lambda x: abs(f(x)),
+            bound,
+            0,
+            bound,
         )
 
         graph = axes.get_graph(f, x_range=(x_min, x_max))
@@ -1379,18 +1402,14 @@ class ShowManyGraphs(Scene):
 
         def get_glow_dot(point):
             result = DotCloud([point] * 10)
-            result.set_radii([
-                interpolate(0.03, 0.06, t**2)
-                for t in np.linspace(0, 1, 10)
-            ])
+            result.set_radii(
+                [interpolate(0.03, 0.06, t**2) for t in np.linspace(0, 1, 10)]
+            )
             result.set_opacity(0.2)
             result.set_color(YELLOW)
             return result
 
-        root_dots = Group(*(
-            get_glow_dot(axes.c2p(root, 0))
-            for root in roots
-        ))
+        root_dots = Group(*(get_glow_dot(axes.c2p(root, 0)) for root in roots))
 
         result = Group(axes, graph, root_dots)
         return result
@@ -1417,7 +1436,7 @@ class AskAboutFractals(TeacherStudentsScene):
             added_anims=[
                 self.students[0].change("confused"),
                 self.students[1].change("sassy"),
-            ]
+            ],
         )
         self.wait()
         self.teacher_says(
@@ -1426,12 +1445,9 @@ class AskAboutFractals(TeacherStudentsScene):
                 "height": 3,
                 "width": 4,
             },
-            target_mode="happy"
+            target_mode="happy",
         )
-        self.play_all_student_changes(
-            "pondering",
-            look_at=self.screen
-        )
+        self.play_all_student_changes("pondering", look_at=self.screen)
         self.wait(2)
 
 
@@ -1453,7 +1469,7 @@ class RealNewtonsMethod(Scene):
             # Change name
             "numbers_with_elongated_ticks": list(range(-2, 3)),
             "include_tip": False,
-        }
+        },
     }
     graph_color = BLUE_C
     guess_color = YELLOW
@@ -1512,93 +1528,88 @@ class RealNewtonsMethod(Scene):
             ShowCreation(self.graph, run_time=4),
         )
         self.wait()
-        self.play(
-            rect.animate.replace(self.poly[-1], stretch=True).scale(1.2)
-        )
+        self.play(rect.animate.replace(self.poly[-1], stretch=True).scale(1.2))
         self.wait()
         self.play(FadeOut(rect))
 
     def highlight_roots(self):
         roots = coefficients_to_roots(self.coefs)
-        real_roots = [
-            root.real for root in roots
-            if abs(root.imag) < 1e-6
-        ]
+        real_roots = [root.real for root in roots if abs(root.imag) < 1e-6]
         real_roots.sort()
 
-        dots = VGroup(*(
-            # Dot(self.axes.c2p(r, 0), radius=0.05)
-            glow_dot(self.axes.c2p(r, 0))
-            for r in real_roots
-        ))
-        squares = VGroup(*[
-            Square().set_height(0.25).move_to(dot)
-            for dot in dots
-        ])
+        dots = VGroup(
+            *(
+                # Dot(self.axes.c2p(r, 0), radius=0.05)
+                glow_dot(self.axes.c2p(r, 0))
+                for r in real_roots
+            )
+        )
+        squares = VGroup(*[Square().set_height(0.25).move_to(dot) for dot in dots])
         squares.set_stroke(YELLOW, 3)
         squares.set_fill(opacity=0)
 
         self.play(
             LaggedStart(
-                *[
-                    FadeIn(dot, scale=0.1)
-                    for dot in dots
-                ] + [
+                *[FadeIn(dot, scale=0.1) for dot in dots]
+                + [
                     VShowPassingFlash(square, time_width=2.0, run_time=2)
                     for square in squares
                 ],
-                lag_ratio=0.15
+                lag_ratio=0.15,
             ),
         )
         self.wait()
 
         # Show values numerically
         root_strs = ["{0:.4}".format(root) for root in real_roots]
-        equations = VGroup(*(
-            OldTex(
-                "P(", root_str, ")", "=", "0",
-                font_size=self.rule_font_size
-            ).set_color_by_tex(root_str, YELLOW)
-            for root_str in root_strs
-        ))
+        equations = VGroup(
+            *(
+                OldTex(
+                    "P(", root_str, ")", "=", "0", font_size=self.rule_font_size
+                ).set_color_by_tex(root_str, YELLOW)
+                for root_str in root_strs
+            )
+        )
         equations.arrange(DOWN, buff=0.5, aligned_edge=LEFT)
         equations.next_to(self.poly, DOWN, LARGE_BUFF, aligned_edge=LEFT)
         question = Text("How do you\ncompute these?")
         question.next_to(equations, RIGHT, buff=LARGE_BUFF)
         question.set_color(YELLOW)
 
-        arrows = VGroup(*(
-            Arrow(
-                question.get_corner(UL) + 0.2 * DL,
-                eq[1].get_corner(UR) + 0.25 * LEFT,
-                path_arc=arc, stroke_width=3,
-                buff=0.2,
+        arrows = VGroup(
+            *(
+                Arrow(
+                    question.get_corner(UL) + 0.2 * DL,
+                    eq[1].get_corner(UR) + 0.25 * LEFT,
+                    path_arc=arc,
+                    stroke_width=3,
+                    buff=0.2,
+                )
+                for eq, arc in zip(equations, [0.7 * PI, 0.5 * PI, 0.0 * PI])
             )
-            for eq, arc in zip(equations, [0.7 * PI, 0.5 * PI, 0.0 * PI])
-        ))
+        )
         arrows.set_color(YELLOW)
 
         self.play(
             LaggedStartMap(FadeIn, equations, lag_ratio=0.25),
-            LaggedStart(*(
-                FadeTransform(dot.copy(), eq[1])
-                for dot, eq in zip(dots, equations)
-            ), lag_ratio=0.25)
+            LaggedStart(
+                *(FadeTransform(dot.copy(), eq[1]) for dot, eq in zip(dots, equations)),
+                lag_ratio=0.25,
+            ),
         )
         self.wait()
-        self.play(
-            Write(question),
-            Write(arrows)
-        )
+        self.play(Write(question), Write(arrows))
         self.wait()
 
-        self.play(LaggedStart(
-            FadeOut(dots),
-            FadeOut(question),
-            FadeOut(arrows),
-            FadeOut(equations),
-            lag_ratio=0.25
-        ))
+        self.play(
+            LaggedStart(
+                FadeOut(dots),
+                FadeOut(question),
+                FadeOut(arrows),
+                FadeOut(equations),
+                lag_ratio=0.25,
+            )
+        )
         self.wait()
 
     def preview_iterative_root_finding(self):
@@ -1607,10 +1618,12 @@ class RealNewtonsMethod(Scene):
         coefs = self.coefs
         n_steps = 5
 
-        root_seekers = VGroup(*(
-            ArrowTip().set_height(0.2).rotate(-PI / 2).move_to(axis.n2p(x), DOWN)
-            for x in np.arange(-2, 2.0, 0.2)[:-1]
-        ))
+        root_seekers = VGroup(
+            *(
+                ArrowTip().set_height(0.2).rotate(-PI / 2).move_to(axis.n2p(x), DOWN)
+                for x in np.arange(-2, 2.0, 0.2)[:-1]
+            )
+        )
         root_seekers.set_stroke(YELLOW, 2, opacity=0.5)
         root_seekers.set_fill(YELLOW, opacity=0.3)
 
@@ -1635,22 +1648,21 @@ class RealNewtonsMethod(Scene):
             self.play(*map(MoveToTarget, root_seekers), run_time=1.0)
         self.wait()
 
-        values = VGroup(*(
-            DecimalNumber(
-                axis.p2n(rs.get_center()),
-                num_decimal_places=5,
-                show_ellipsis=True,
-            ).next_to(rs, UP, SMALL_BUFF)
-            for rs in root_seekers[0::len(root_seekers) // 2]
-        ))
+        values = VGroup(
+            *(
+                DecimalNumber(
+                    axis.p2n(rs.get_center()),
+                    num_decimal_places=5,
+                    show_ellipsis=True,
+                ).next_to(rs, UP, SMALL_BUFF)
+                for rs in root_seekers[0 :: len(root_seekers) // 2]
+            )
+        )
         values.set_fill(YELLOW)
         values.set_stroke(BLACK, 8, background=True)
         last_value = VMobject()
         for value in values:
-            self.play(
-                FadeIn(value),
-                FadeOut(last_value)
-            )
+            self.play(FadeIn(value), FadeOut(last_value))
             self.wait(0.5)
             last_value = value
         self.play(FadeOut(last_value))
@@ -1665,8 +1677,7 @@ class RealNewtonsMethod(Scene):
 
         # Add labels
         guess_label = OldTex(
-            "\\text{Guess: } x_0 = " + f"{self.seed}",
-            tex_to_color_map={"x_0": YELLOW}
+            "\\text{Guess: } x_0 = " + f"{self.seed}", tex_to_color_map={"x_0": YELLOW}
         )
         guess_label.next_to(self.poly, DOWN, LARGE_BUFF)
         guess_marker, guess_value, guess_tracker = self.get_guess_group()
@@ -1676,10 +1687,7 @@ class RealNewtonsMethod(Scene):
         self.wait()
         self.play(Write(guess_label))
         self.play(
-            FadeTransform(
-                guess_label[1].copy(),
-                VGroup(guess_marker, guess_value)
-            )
+            FadeTransform(guess_label[1].copy(), VGroup(guess_marker, guess_value))
         )
         self.wait()
 
@@ -1723,10 +1731,7 @@ class RealNewtonsMethod(Scene):
         dpoly.match_style(self.poly)
         dpoly.next_to(self.poly, DOWN, aligned_edge=LEFT)
 
-        self.play(
-            FadeIn(dpoly, 0.5 * DOWN),
-            guess_label.animate.shift(0.25 * DOWN)
-        )
+        self.play(FadeIn(dpoly, 0.5 * DOWN), guess_label.animate.shift(0.25 * DOWN))
         self.play(FlashAround(dpoly))
         self.wait()
 
@@ -1738,10 +1743,7 @@ class RealNewtonsMethod(Scene):
         step_word.set_stroke(BLACK, 3, background=True)
         step_word.next_to(step_arrow, UP, SMALL_BUFF)
 
-        self.play(
-            ShowCreation(step_arrow),
-            FadeIn(step_word)
-        )
+        self.play(ShowCreation(step_arrow), FadeIn(step_word))
         self.wait()
 
         # Show slope
@@ -1752,12 +1754,7 @@ class RealNewtonsMethod(Scene):
         slope_eqs = [
             OldTex(
                 tex,
-                isolate=[
-                    "P'(x_0)",
-                    "P(x_0)",
-                    "\\text{Step}",
-                    "-"
-                ],
+                isolate=["P'(x_0)", "P(x_0)", "\\text{Step}", "-"],
                 font_size=self.rule_font_size,
             )
             for tex in slope_eq_texs
@@ -1773,15 +1770,19 @@ class RealNewtonsMethod(Scene):
         for line in [v_line, Line(tan_line.get_start(), v_line.get_start())]:
             self.play(
                 VShowPassingFlash(
-                    Line(line.get_start(), line.get_end()).set_stroke(YELLOW, 10).insert_n_curves(20),
+                    Line(line.get_start(), line.get_end())
+                    .set_stroke(YELLOW, 10)
+                    .insert_n_curves(20),
                     time_width=1.0,
-                    run_time=1.5
+                    run_time=1.5,
                 )
             )
         self.wait()
         self.play(
             FadeTransform(v_line_label.copy(), slope_eqs[0].get_part_by_tex("P(x_0)")),
-            FadeTransform(step_word.copy(), slope_eqs[0].get_part_by_tex("\\text{Step}")),
+            FadeTransform(
+                step_word.copy(), slope_eqs[0].get_part_by_tex("\\text{Step}")
+            ),
             FadeIn(slope_eqs[0][3:5]),
         )
         self.wait()
@@ -1789,10 +1790,7 @@ class RealNewtonsMethod(Scene):
         self.wait()
         self.play(TransformMatchingTex(*slope_eqs, path_arc=PI / 2))
         self.wait()
-        self.play(
-            FadeIn(rule),
-            slope_eqs[1].animate.to_edge(DOWN)
-        )
+        self.play(FadeIn(rule), slope_eqs[1].animate.to_edge(DOWN))
         self.wait()
 
         # Transition to x1
@@ -1821,14 +1819,8 @@ class RealNewtonsMethod(Scene):
         tan_line = self.get_tan_line(guess)
 
         self.add(v_line, tan_line, self.guess_marker, self.guess_value)
-        self.play(
-            ShowCreation(v_line),
-            GrowFromCenter(tan_line)
-        )
-        anims = [
-            FadeOut(v_line),
-            self.guess_tracker.animate.set_value(next_guess)
-        ]
+        self.play(ShowCreation(v_line), GrowFromCenter(tan_line))
+        anims = [FadeOut(v_line), self.guess_tracker.animate.set_value(next_guess)]
         if added_anims is not None:
             anims += added_anims
         tan_fade = FadeOut(tan_line)
@@ -1849,9 +1841,7 @@ class RealNewtonsMethod(Scene):
         guess_marker.set_width(0.1, stretch=True)
         guess_marker.set_fill(self.guess_color, 1)
         guess_marker.set_stroke(width=0)
-        guess_marker.add_updater(lambda m: m.move_to(
-            axes.c2p(get_guess(), 0), UP
-        ))
+        guess_marker.add_updater(lambda m: m.move_to(axes.c2p(get_guess(), 0), UP))
         guess_value = DecimalNumber(0, num_decimal_places=3, font_size=24)
 
         def update_guess_value(gv):
@@ -1886,10 +1876,12 @@ class RealNewtonsMethod(Scene):
             """
                 z_1 =
                 z_0 - {P(z_0) \\over P'(z_0)}
-            """.replace("z", char),
+            """.replace(
+                "z", char
+            ),
             tex_to_color_map={
                 f"{char}_1": self.guess_color,
-                f"{char}_0": self.guess_color
+                f"{char}_0": self.guess_color,
             },
             font_size=self.rule_font_size,
         )
@@ -1917,7 +1909,7 @@ class RealNewtonsMethod(Scene):
         result = (
             FadeOut(rule.zns),
             FadeTransformPieces(rule.znp1, zns),
-            FadeIn(znp1, 0.5 * RIGHT)
+            FadeIn(znp1, 0.5 * RIGHT),
         )
         rule.zns = zns
         rule.znp1 = znp1
@@ -1943,7 +1935,7 @@ class FasterNewtonExample(RealNewtonsMethod):
             # Change name
             "numbers_with_elongated_ticks": list(range(-2, 3)),
             "include_tip": False,
-        }
+        },
     }
 
     def construct(self):
@@ -1956,8 +1948,7 @@ class FasterNewtonExample(RealNewtonsMethod):
     def find_root(self, cycle_run_time=1.0):
         for n in range(self.n_search_steps):
             self.step_towards_root(
-                added_anims=self.cycle_rule_entries_anims(),
-                fade_tan_with_vline=True
+                added_anims=self.cycle_rule_entries_anims(), fade_tan_with_vline=True
             )
 
 
@@ -1967,12 +1958,12 @@ class AssumingItsGood(TeacherStudentsScene):
         self.teacher_says(
             OldTexText("Assuming this\\\\approximation\\\\is decent...", font_size=42),
             bubble_config={
-                "height": 3, "width": 4,
-            }
+                "height": 3,
+                "width": 4,
+            },
         )
         self.play_student_changes(
-            "pondering", "pondering", "tease",
-            look_at=self.screen
+            "pondering", "pondering", "tease", look_at=self.screen
         )
         self.pi_creatures.refresh_triangulation()
         self.wait(3)
@@ -1989,14 +1980,17 @@ class AltPauseAndPonder(Scene):
     def construct(self):
         morty = Mortimer(height=2)
         morty.flip().to_corner(DL)
-        self.play(PiCreatureSays(
-            morty, OldTexText("Pause and\\\\Ponder", font_size=36),
-            target_mode="hooray",
-            bubble_config={
-                "height": 2,
-                "width": 3,
-            }
-        ))
+        self.play(
+            PiCreatureSays(
+                morty,
+                OldTexText("Pause and\\\\Ponder", font_size=36),
+                target_mode="hooray",
+                bubble_config={
+                    "height": 2,
+                    "width": 3,
+                },
+            )
+        )
         self.play(Blink(morty))
         self.wait(2)
         self.play(morty.change("thinking"))
@@ -2025,12 +2019,13 @@ class GutCheckFormula(RealNewtonsMethod):
 
     def add_axes_and_graph(self):
         axes = NumberPlane(
-            (-2, 15), (-2, 8),
+            (-2, 15),
+            (-2, 8),
             faded_line_ratio=1,
             background_line_style={
                 "stroke_opacity": 0.5,
                 "stroke_color": GREY,
-            }
+            },
         )
         axes.to_corner(DL, buff=0)
         axes.add_coordinate_labels(font_size=16, fill_opacity=0.5)
@@ -2049,10 +2044,7 @@ class GutCheckFormula(RealNewtonsMethod):
         self.graph = graph
 
     def add_rule(self):
-        rule = OldTex(
-            "x_{n + 1}", "=",
-            "x_{n}", " - ", "{P(x) ", "\\over ", "P'(x)}"
-        )
+        rule = OldTex("x_{n + 1}", "=", "x_{n}", " - ", "{P(x) ", "\\over ", "P'(x)}")
         rule.set_stroke(BLACK, 5, background=True)
         rule.to_corner(UR)
 
@@ -2141,7 +2133,7 @@ class GutCheckFormula(RealNewtonsMethod):
         self.play(
             graph.animate.stretch(8, 1, about_point=self.axes.c2p(0, 0)),
             box.animate.replace(self.rule[-1]).scale(1.2),
-            run_time=3
+            run_time=3,
         )
         self.wait()
 
@@ -2192,7 +2184,9 @@ class HistoryWithNewton(Scene):
         newton.next_to(title, DOWN, buff=0.5)
         newton.to_edge(LEFT, buff=1.5)
         newton_point = timeline.n2p(1669)
-        newton_arrow = Arrow(newton_point, newton[0].get_right() + DOWN, path_arc=PI / 3)
+        newton_arrow = Arrow(
+            newton_point, newton[0].get_right() + DOWN, path_arc=PI / 3
+        )
 
         newton_words = Text("Overly\ncomplicated", font_size=36)
         newton_words.next_to(newton[0], RIGHT)
@@ -2202,7 +2196,9 @@ class HistoryWithNewton(Scene):
         raphson.move_to(newton)
         raphson.set_x(raphson_point[0] + 2)
         raphson[1].set_opacity(0)
-        raphson_arrow = Arrow(raphson_point, raphson[0].get_left() + DOWN, path_arc=-PI / 3)
+        raphson_arrow = Arrow(
+            raphson_point, raphson[0].get_left() + DOWN, path_arc=-PI / 3
+        )
         raphson_word = Text("Simplified", font_size=36)
         raphson_word.next_to(raphson[0], LEFT)
 
@@ -2224,7 +2220,7 @@ class HistoryWithNewton(Scene):
         frame.move_to(timeline, RIGHT)
         self.play(
             frame.animate.match_width(timeline).set_x(timeline.get_center()[0]),
-            run_time=2
+            run_time=2,
         )
         self.play(Restore(frame, run_time=2))
 
@@ -2259,7 +2255,7 @@ class HistoryWithNewton(Scene):
                 title.get_part_by_text("method"),
                 new_title.get_part_by_text("method"),
             ),
-            FadeIn(new_title.get_part_by_text("-"))
+            FadeIn(new_title.get_part_by_text("-")),
         )
         self.play(FlashAround(new_title, run_time=2))
         self.wait()
@@ -2289,7 +2285,7 @@ class CalcHomework(GutCheckFormula):
             background_line_style={
                 "stroke_color": GREY_C,
                 "stroke_width": 1,
-            }
+            },
         )
         axes.to_edge(DOWN, buff=0)
         axes.add_coordinate_labels(font_size=18)
@@ -2300,25 +2296,21 @@ class CalcHomework(GutCheckFormula):
         hw = OldTexText(
             "Homework:\\\\",
             "\\quad Approximate $\\sqrt{7}$ by hand using\\\\",
-            "\\quad the ", "Newton-Raphson method.",
+            "\\quad the ",
+            "Newton-Raphson method.",
             alignment="",
             font_size=36,
             color=GREY_A,
         )
         hw[1:].shift(MED_SMALL_BUFF * RIGHT + SMALL_BUFF * DOWN)
-        hw.add_to_back(
-            BackgroundRectangle(hw, fill_opacity=0.8, buff=0.25)
-        )
+        hw.add_to_back(BackgroundRectangle(hw, fill_opacity=0.8, buff=0.25))
         hw.move_to(axes, UL)
         hw.to_edge(LEFT, buff=0)
 
         self.wait()
         self.play(
             FadeIn(hw, lag_ratio=0.1, run_time=2),
-            FadeTransform(
-                old_title,
-                hw[-1]
-            ),
+            FadeTransform(old_title, hw[-1]),
             FadeIn(title),
             ShowCreation(line),
         )
@@ -2326,8 +2318,7 @@ class CalcHomework(GutCheckFormula):
 
         # Graph
         graph = axes.get_graph(
-            lambda x: x**2 - 7,
-            x_range=(-math.sqrt(17), math.sqrt(17))
+            lambda x: x**2 - 7, x_range=(-math.sqrt(17), math.sqrt(17))
         )
         graph.set_stroke(BLUE, 2)
         graph_label = OldTex("x^2 - 7", font_size=36)
@@ -2352,7 +2343,7 @@ class CalcHomework(GutCheckFormula):
         update_tex = OldTex(
             "3 \\rightarrow 3 - {3^2 - 7 \\over 2 \\cdot 3}",
             tex_to_color_map={"3": YELLOW},
-            font_size=28
+            font_size=28,
         )
         update_tex.next_to(axes.c2p(1.2, 0), UR, buff=SMALL_BUFF)
 
@@ -2362,10 +2353,7 @@ class CalcHomework(GutCheckFormula):
             FadeIn(update_tex),
         )
         self.wait()
-        self.play(
-            self.guess_tracker.animate.set_value(8 / 3),
-            run_time=2
-        )
+        self.play(self.guess_tracker.animate.set_value(8 / 3), run_time=2)
 
 
 class RealNewtonsMethodHigherGraph(FasterNewtonExample):
@@ -2384,32 +2372,27 @@ class FactorPolynomial(RealNewtonsMethodHigherGraph):
         poly = self.poly
         colors = color_gradient((BLUE, YELLOW), 5)
         factored = OldTex(
-            "P(x) = ", *(
-                f"(x - r_{n})"
-                for n in range(5)
-            ),
-            tex_to_color_map={
-                f"r_{n}": color
-                for n, color in enumerate(colors)
-            }
+            "P(x) = ",
+            *(f"(x - r_{n})" for n in range(5)),
+            tex_to_color_map={f"r_{n}": color for n, color in enumerate(colors)},
         )
         factored.match_height(poly[0])
         factored.next_to(poly, DOWN, LARGE_BUFF, LEFT)
 
-        self.play(
-            FadeTransform(poly.copy(), factored)
-        )
+        self.play(FadeTransform(poly.copy(), factored))
         self.wait()
 
         words = OldTexText("Potentially complex\\\\", "$r_n = a_n + b_n i$")
         words.set_color(GREY_A)
         words.next_to(factored, DOWN, buff=1.5)
         words.shift(LEFT)
-        lines = VGroup(*(
-            Line(words, part, buff=0.15).set_stroke(part.get_color(), 2)
-            for n in range(5)
-            for part in [factored.get_part_by_tex(f"r_{n}")]
-        ))
+        lines = VGroup(
+            *(
+                Line(words, part, buff=0.15).set_stroke(part.get_color(), 2)
+                for n in range(5)
+                for part in [factored.get_part_by_tex(f"r_{n}")]
+            )
+        )
 
         self.play(
             FadeIn(words[0]),
@@ -2459,13 +2442,19 @@ class TransitionToComplexPlane(RealNewtonsMethodHigherGraph):
         output_marker = marker.copy()
         output_marker.set_color(MAROON_B)
         input_marker.add_updater(lambda m: m.move_to(axes.x_axis.n2p(get_x()), UP))
-        output_marker.add_updater(lambda m: m.shift(axes.y_axis.n2p(get_px()) - m.get_start()))
+        output_marker.add_updater(
+            lambda m: m.shift(axes.y_axis.n2p(get_px()) - m.get_start())
+        )
 
         v_line = always_redraw(
-            lambda: axes.get_v_line(get_graph_point(), line_func=Line).set_stroke(YELLOW, 1)
+            lambda: axes.get_v_line(get_graph_point(), line_func=Line).set_stroke(
+                YELLOW, 1
+            )
         )
         h_line = always_redraw(
-            lambda: axes.get_h_line(get_graph_point(), line_func=Line).set_stroke(MAROON_B, 1)
+            lambda: axes.get_h_line(get_graph_point(), line_func=Line).set_stroke(
+                MAROON_B, 1
+            )
         )
 
         self.add(
@@ -2478,9 +2467,11 @@ class TransitionToComplexPlane(RealNewtonsMethodHigherGraph):
 
         self.play(input_tracker.animate.set_value(-0.5), run_time=3)
         self.play(input_tracker.animate.set_value(1.0), run_time=3)
-        self.play(ShowCreationThenFadeOut(
-            axes.get_tangent_line(get_x(), self.graph).set_stroke(RED, 3)
-        ))
+        self.play(
+            ShowCreationThenFadeOut(
+                axes.get_tangent_line(get_x(), self.graph).set_stroke(RED, 3)
+            )
+        )
 
         self.input_tracker = input_tracker
         self.input_marker = input_marker
@@ -2542,7 +2533,7 @@ class TransitionToComplexPlane(RealNewtonsMethodHigherGraph):
             Rotate(
                 VGroup(y_axis, output_word, output_marker),
                 -PI / 2,
-                about_point=out_plane.n2p(0)
+                about_point=out_plane.n2p(0),
             )
         )
         self.add(out_plane, output_marker)
@@ -2565,7 +2556,9 @@ class TransitionToComplexPlane(RealNewtonsMethodHigherGraph):
         output_marker = self.output_marker
 
         in_dot, out_dot = [
-            Dot(radius=0.05).set_fill(marker.get_fill_color()).move_to(marker.get_start())
+            Dot(radius=0.05)
+            .set_fill(marker.get_fill_color())
+            .move_to(marker.get_start())
             for marker in (input_marker, output_marker)
         ]
         in_dot.set_fill(YELLOW, 1)
@@ -2574,9 +2567,11 @@ class TransitionToComplexPlane(RealNewtonsMethodHigherGraph):
         out_tracer = TracingTail(out_dot, stroke_color=out_dot.get_color())
         self.add(in_tracer, out_tracer)
 
-        out_dot.add_updater(lambda m: m.move_to(out_plane.n2p(
-            poly(in_plane.p2n(in_dot.get_center()), self.coefs)
-        )))
+        out_dot.add_updater(
+            lambda m: m.move_to(
+                out_plane.n2p(poly(in_plane.p2n(in_dot.get_center()), self.coefs))
+            )
+        )
 
         z_label = OldTex("z", font_size=24)
         z_label.set_fill(YELLOW)
@@ -2593,9 +2588,7 @@ class TransitionToComplexPlane(RealNewtonsMethodHigherGraph):
             FadeIn(z_label),
             FlashAround(z_label),
         )
-        self.play(
-            FadeTransform(z_label.copy(), pz_label)
-        )
+        self.play(FadeTransform(z_label.copy(), pz_label))
         z_values = [
             complex(-0.5, 0.5),
             complex(-0.5, -0.5),
@@ -2606,9 +2599,7 @@ class TransitionToComplexPlane(RealNewtonsMethodHigherGraph):
         ]
         for z in z_values:
             self.play(
-                in_dot.animate.move_to(in_plane.n2p(z)),
-                run_time=2,
-                path_arc=PI / 2
+                in_dot.animate.move_to(in_plane.n2p(z)), run_time=2, path_arc=PI / 2
             )
             self.wait()
 
@@ -2670,7 +2661,7 @@ class ComplexNewtonsMethod(RealNewtonsMethod):
         z0_def = OldTex(
             f"z_0 = {self.seed_tex}",
             tex_to_color_map={"z_0": self.guess_color},
-            font_size=self.rule_font_size
+            font_size=self.rule_font_size,
         )
         z0_group = VGroup(seed_text, z0_def)
         z0_group.arrange(DOWN)
@@ -2680,9 +2671,9 @@ class ComplexNewtonsMethod(RealNewtonsMethod):
 
         guess = DecimalNumber(self.seed, num_decimal_places=3, font_size=30)
         guess.add_updater(
-            lambda m: m.set_value(self.plane.p2n(
-                guess_dot.get_center()
-            )).set_fill(self.guess_color).add_background_rectangle()
+            lambda m: m.set_value(self.plane.p2n(guess_dot.get_center()))
+            .set_fill(self.guess_color)
+            .add_background_rectangle()
         )
         guess.add_updater(lambda m: m.next_to(guess_dot, UP, buff=0.15))
 
@@ -2754,7 +2745,7 @@ class ComplexNewtonsMethod(RealNewtonsMethod):
             dot_step_anims[1],
             FadeOut(diff_rect),
             *self.cycle_rule_entries_anims(),
-            run_time=2
+            run_time=2,
         )
         self.wait()
 
@@ -2778,14 +2769,17 @@ class ComplexNewtonsMethod(RealNewtonsMethod):
                     z1 = z0
 
                 arrow = Arrow(
-                    plane.n2p(z0), plane.n2p(z1),
+                    plane.n2p(z0),
+                    plane.n2p(z1),
                     buff=0,
                     stroke_width=self.step_arrow_width,
                     storke_opacity=self.step_arrow_opacity,
                 )
                 if self.step_arrow_len is not None:
                     if arrow.get_length() > self.step_arrow_len:
-                        arrow.set_length(self.step_arrow_len, about_point=arrow.get_start())
+                        arrow.set_length(
+                            self.step_arrow_len, about_point=arrow.get_start()
+                        )
 
                 if not hasattr(dot, "history"):
                     dot.history = [dot.get_center().copy()]
@@ -2800,7 +2794,7 @@ class ComplexNewtonsMethod(RealNewtonsMethod):
             AnimationGroup(
                 MoveToTarget(dots),
                 FadeOut(arrows),
-            )
+            ),
         ]
 
 
@@ -2812,10 +2806,7 @@ class OutputIsZero(Scene):
         words.next_to(arrow, DR)
         words.shift(0.5 * LEFT)
 
-        self.play(
-            Write(words),
-            ShowCreation(arrow)
-        )
+        self.play(Write(words), ShowCreation(arrow))
         self.wait()
 
 
@@ -2857,7 +2848,7 @@ class ComplexNewtonsMethodManySeeds(ComplexNewtonsMethod):
         z0_def = OldTex(
             "z_0",
             tex_to_color_map={"z_0": self.guess_color},
-            font_size=self.rule_font_size
+            font_size=self.rule_font_size,
         )
         z0_group = VGroup(seed_text, z0_def)
         z0_group.arrange(RIGHT)
@@ -2868,15 +2859,17 @@ class ComplexNewtonsMethodManySeeds(ComplexNewtonsMethod):
         step = self.step
         x_vals = np.arange(x_range[0], x_range[1] + step, step)
         y_vals = np.arange(y_range[0], y_range[1] + step, step)
-        guess_dots = VGroup(*(
-            Dot(
-                self.plane.c2p(x, y),
-                radius=self.dot_radius,
-                fill_opacity=self.dot_opacity,
+        guess_dots = VGroup(
+            *(
+                Dot(
+                    self.plane.c2p(x, y),
+                    radius=self.dot_radius,
+                    fill_opacity=self.dot_opacity,
+                )
+                for i, x in enumerate(x_vals)
+                for y in (y_vals if i % 2 == 0 else reversed(y_vals))
             )
-            for i, x in enumerate(x_vals)
-            for y in (y_vals if i % 2 == 0 else reversed(y_vals))
-        ))
+        )
         guess_dots.set_submobject_colors_by_gradient(WHITE, GREY_B)
         guess_dots.set_fill(opacity=self.dot_opacity)
         guess_dots.set_stroke(BLACK, 2, background=True)
@@ -2886,11 +2879,14 @@ class ComplexNewtonsMethodManySeeds(ComplexNewtonsMethod):
             FadeIn(z0_def),
         )
         self.play(
-            LaggedStart(*(
-                FadeTransform(z0_def[0].copy(), guess_dot)
-                for guess_dot in guess_dots
-            ), lag_ratio=0.1 / len(guess_dots)),
-            run_time=3
+            LaggedStart(
+                *(
+                    FadeTransform(z0_def[0].copy(), guess_dot)
+                    for guess_dot in guess_dots
+                ),
+                lag_ratio=0.1 / len(guess_dots),
+            ),
+            run_time=3,
         )
         self.add(guess_dots)
         self.wait()
@@ -2904,16 +2900,19 @@ class ComplexNewtonsMethodManySeeds(ComplexNewtonsMethod):
         root_points = list(map(self.plane.n2p, roots))
         colors = self.colors
 
-        root_circles = VGroup(*(
-            Dot(radius=0.1).set_fill(color, opacity=0.75).move_to(rp)
-            for rp, color in zip(root_points, colors)
-        ))
+        root_circles = VGroup(
+            *(
+                Dot(radius=0.1).set_fill(color, opacity=0.75).move_to(rp)
+                for rp, color in zip(root_points, colors)
+            )
+        )
 
         self.play(
-            LaggedStart(*(
-                FadeIn(rc, scale=0.5)
-                for rc in root_circles
-            ), lag_ratio=0.7, run_time=1),
+            LaggedStart(
+                *(FadeIn(rc, scale=0.5) for rc in root_circles),
+                lag_ratio=0.7,
+                run_time=1,
+            ),
         )
         self.wait()
 
@@ -2924,11 +2923,7 @@ class ComplexNewtonsMethodManySeeds(ComplexNewtonsMethod):
         dot_step_anims = self.get_dot_step_anims(dots)
 
         self.play(dot_step_anims[0], run_time=0.25)
-        self.play(
-            dot_step_anims[1],
-            *self.cycle_rule_entries_anims(),
-            run_time=1
-        )
+        self.play(dot_step_anims[1], *self.cycle_rule_entries_anims(), run_time=1)
 
     def add_color(self):
         root_points = [circ.get_center() for circ in self.root_circles]
@@ -2938,21 +2933,20 @@ class ComplexNewtonsMethodManySeeds(ComplexNewtonsMethod):
         dots.generate_target()
         for dot, dot_target in zip(dots, dots.target):
             dc = dot.get_center()
-            dot_target.set_color(colors[
-                np.argmin([get_norm(dc - rp) for rp in root_points])
-            ])
+            dot_target.set_color(
+                colors[np.argmin([get_norm(dc - rp) for rp in root_points])]
+            )
 
         rect = SurroundingRectangle(self.rule)
         rect.set_fill(BLACK, 1)
         rect.set_stroke(width=0)
 
-        self.play(
-            FadeIn(rect),
-            MoveToTarget(dots)
-        )
+        self.play(FadeIn(rect), MoveToTarget(dots))
         self.wait()
 
-        len_history = max([len(dot.history) for dot in dots if hasattr(dot, "history")], default=0)
+        len_history = max(
+            [len(dot.history) for dot in dots if hasattr(dot, "history")], default=0
+        )
         for n in range(len_history):
             dots.generate_target()
             for dot, dot_target in zip(dots, dots.target):
@@ -2984,7 +2978,7 @@ class IntroNewtonFractal(Scene):
         },
         "axis_config": {
             "stroke_width": 1.0,
-        }
+        },
     }
     n_steps = 30
 
@@ -3011,27 +3005,27 @@ class IntroNewtonFractal(Scene):
             *(
                 dot.animate.set_fill(interpolate_color(color, WHITE, 0.2))
                 for dot, color in zip(root_dots, ROOT_COLORS_DEEP)
-            )
+            ),
         )
         self.wait()
 
         # Zoom in
         fractal.set_n_steps(40)
         zoom_points = [
-            [-3.12334879, 1.61196545, 0.],
-            [1.21514006, 0.01415811, 0.],
+            [-3.12334879, 1.61196545, 0.0],
+            [1.21514006, 0.01415811, 0.0],
         ]
         for point in zoom_points:
             self.play(
                 frame.animate.set_height(2e-3).move_to(point),
                 run_time=25,
-                rate_func=bezier(2 * [0] + 6 * [1])
+                rate_func=bezier(2 * [0] + 6 * [1]),
             )
             self.wait()
             self.play(
                 frame.animate.center().set_height(8),
                 run_time=10,
-                rate_func=bezier(6 * [0] + 2 * [1])
+                rate_func=bezier(6 * [0] + 2 * [1]),
             )
 
         # Allow for play
@@ -3068,21 +3062,23 @@ class IntroNewtonFractal(Scene):
         )
 
     def get_root_dots(self, plane, fractal):
-        self.root_dots = VGroup(*(
-            Dot(plane.n2p(root), color=color)
-            for root, color in zip(
-                coefficients_to_roots(fractal.coefs),
-                fractal.colors
+        self.root_dots = VGroup(
+            *(
+                Dot(plane.n2p(root), color=color)
+                for root, color in zip(
+                    coefficients_to_roots(fractal.coefs), fractal.colors
+                )
             )
-        ))
+        )
         self.root_dots.set_stroke(BLACK, 5, background=True)
         return self.root_dots
 
     def tie_fractal_to_root_dots(self, fractal):
-        fractal.add_updater(lambda f: f.set_roots([
-            self.plane.p2n(dot.get_center())
-            for dot in self.root_dots
-        ]))
+        fractal.add_updater(
+            lambda f: f.set_roots(
+                [self.plane.p2n(dot.get_center()) for dot in self.root_dots]
+            )
+        )
 
     def on_mouse_press(self, point, button, mods):
         super().on_mouse_press(point, button, mods)
@@ -3106,7 +3102,7 @@ class ChaosOnBoundary(TeacherStudentsScene):
             bubble_config={
                 "height": 3,
                 "width": 3,
-            }
+            },
         )
         self.play_all_student_changes("pondering", look_at=self.screen)
         self.wait(3)
@@ -3126,7 +3122,7 @@ class DeepZoomFractal(IntroNewtonFractal):
         },
         "axis_config": {
             "stroke_width": 1.0,
-        }
+        },
     }
 
     def construct(self):
@@ -3135,15 +3131,22 @@ class DeepZoomFractal(IntroNewtonFractal):
 
         he_tracker = ValueTracker(0)
         frame = self.camera.frame
-        zoom_point = np.array([
-            # -1.91177811, 0.52197285, 0.
-            0.72681252, -0.66973296, 0.
-        ], dtype=np.float64)
+        zoom_point = np.array(
+            [
+                # -1.91177811, 0.52197285, 0.
+                0.72681252,
+                -0.66973296,
+                0.0,
+            ],
+            dtype=np.float64,
+        )
 
         initial_fh = FRAME_HEIGHT
-        frame.add_updater(lambda m: m.set_height(
-            initial_fh * 2**(-he_tracker.get_value()),
-        ))
+        frame.add_updater(
+            lambda m: m.set_height(
+                initial_fh * 2 ** (-he_tracker.get_value()),
+            )
+        )
         # rd_height = root_dots.get_height()
         # root_dots.add_updater(lambda m: m.set_height(
         #     rd_height * 2**(he_tracker.get_value() / 8),
@@ -3158,7 +3161,8 @@ class DeepZoomFractal(IntroNewtonFractal):
                 run_time=15,
             ),
             ApplyMethod(
-                he_tracker.set_value, 14,
+                he_tracker.set_value,
+                14,
                 run_time=30,
                 rate_func=bezier([0, 0, 1, 1]),
             ),
@@ -3183,9 +3187,7 @@ class IncreasingStepsNewtonFractal(IntroNewtonFractal):
         step_tracker = ValueTracker(0)
         get_n_steps = step_tracker.get_value
         fractal.add_updater(lambda m: m.set_n_steps(int(get_n_steps())))
-        steps_label[0].add_updater(
-            lambda m: m.set_value(int(get_n_steps()))
-        )
+        steps_label[0].add_updater(lambda m: m.set_value(int(get_n_steps())))
         steps_label[0].add_updater(lambda m: m.set_stroke(BLACK, 5, background=True))
 
         if self.play_mode:
@@ -3199,10 +3201,7 @@ class IncreasingStepsNewtonFractal(IntroNewtonFractal):
                 else:
                     self.wait()
         else:
-            self.play(
-                step_tracker.animate.set_value(20),
-                run_time=10
-            )
+            self.play(step_tracker.animate.set_value(20), run_time=10)
 
 
 class ManyQuestions(Scene):
@@ -3230,10 +3229,14 @@ class ManyQuestions(Scene):
         screens.set_height(FRAME_HEIGHT - 0.5)
         screens.center()
 
-        self.play(LaggedStartMap(
-            FadeIn, screens,
-            lag_ratio=0.9,
-        ), run_time=8)
+        self.play(
+            LaggedStartMap(
+                FadeIn,
+                screens,
+                lag_ratio=0.9,
+            ),
+            run_time=8,
+        )
         self.wait()
 
 
@@ -3248,10 +3251,15 @@ class WhatsGoingOn(TeacherStudentsScene):
             target_mode="angry",
             look_at=self.screen,
             index=2,
-            added_anims=[LaggedStart(*(
-                pi.change("guilty", self.students[2].eyes)
-                for pi in [self.teacher, *self.students[:2]]
-            ), run_time=2)]
+            added_anims=[
+                LaggedStart(
+                    *(
+                        pi.change("guilty", self.students[2].eyes)
+                        for pi in [self.teacher, *self.students[:2]]
+                    ),
+                    run_time=2,
+                )
+            ],
         )
         self.wait(4)
 
@@ -3338,16 +3346,14 @@ class RepeatedNewton(Scene):
 
     def add_labels(self):
         eq_label = self.eq_label = OldTex(
-            "P(z) = " + coefs_to_poly_string(self.coefs),
-            font_size=36
+            "P(z) = " + coefs_to_poly_string(self.coefs), font_size=36
         )
 
         rule_label = self.rule_label = get_newton_rule()
         rule_label.next_to(eq_label, DOWN, MED_LARGE_BUFF)
 
         corner_rect = SurroundingRectangle(
-            VGroup(eq_label, rule_label),
-            buff=MED_SMALL_BUFF
+            VGroup(eq_label, rule_label), buff=MED_SMALL_BUFF
         )
         corner_rect.set_fill(BLACK, 0.9)
         corner_rect.set_stroke(WHITE, 1)
@@ -3363,28 +3369,30 @@ class RepeatedNewton(Scene):
 
     def add_true_roots(self):
         roots = self.roots = coefficients_to_roots(self.coefs)
-        root_dots = self.root_dots = VGroup(*(
-            glow_dot(self.plane.n2p(root), color=color, opacity_mult=2.0)
-            for root, color in zip(roots, self.colors)
-        ))
+        root_dots = self.root_dots = VGroup(
+            *(
+                glow_dot(self.plane.n2p(root), color=color, opacity_mult=2.0)
+                for root, color in zip(roots, self.colors)
+            )
+        )
 
         self.add(root_dots)
 
     def add_dots(self):
-        dots = self.dots = DotCloud(
-            self.get_original_points(), **self.dots_config
-        )
+        dots = self.dots = DotCloud(self.get_original_points(), **self.dots_config)
 
         self.add(dots, self.corner_group)
         self.play(ShowCreation(dots))
 
     def get_original_points(self):
         step = 1.0 / self.dot_density
-        return self.points_scalar * np.array([
-            self.plane.c2p(x, y)
-            for x in np.arange(*self.plane.x_range[:2], step)
-            for y in np.arange(*self.plane.y_range[:2], step)
-        ])
+        return self.points_scalar * np.array(
+            [
+                self.plane.c2p(x, y)
+                for x in np.arange(*self.plane.x_range[:2], step)
+                for y in np.arange(*self.plane.y_range[:2], step)
+            ]
+        )
 
     def run_iterations(self):
         self.points_history = []
@@ -3469,7 +3477,9 @@ class RepeatedNewton(Scene):
         plane = self.plane
 
         fractal = self.fractal = self.get_fractal(**kwargs)
-        root_dot_backs = VGroup(*(Dot(rd.get_center(), radius=0.1) for rd in self.root_dots))
+        root_dot_backs = VGroup(
+            *(Dot(rd.get_center(), radius=0.1) for rd in self.root_dots)
+        )
         root_dot_backs.set_stroke(BLACK, 2)
         root_dot_backs.set_fill(opacity=0)
 
@@ -3552,9 +3562,11 @@ class UnrelatedIdeas(TeacherStudentsScene):
         self.add(self.screen)
 
         self.play_student_changes(
-            "tease", "thinking", "raise_right_hand",
+            "tease",
+            "thinking",
+            "raise_right_hand",
             look_at=self.screen,
-            added_anims=[self.teacher.change("happy")]
+            added_anims=[self.teacher.change("happy")],
         )
         self.wait(2)
         self.teacher_says(
@@ -3563,16 +3575,15 @@ class UnrelatedIdeas(TeacherStudentsScene):
                 "height": 3,
                 "width": 4,
             },
-            added_anims=[
-                s.change("sassy", self.teacher.eyes)
-                for s in self.students
-            ]
+            added_anims=[s.change("sassy", self.teacher.eyes) for s in self.students],
         )
-        self.play(LaggedStart(
-            self.students[2].change("angry"),
-            self.teacher.change("guilty"),
-            lag_ratio=0.7,
-        ))
+        self.play(
+            LaggedStart(
+                self.students[2].change("angry"),
+                self.teacher.change("guilty"),
+                lag_ratio=0.7,
+            )
+        )
         self.wait(2)
 
         self.embed()
@@ -3589,7 +3600,7 @@ class RepeatedNewtonCubic(RepeatedNewton):
 
         frame = self.camera.frame
         self.play(
-            frame.animate.move_to([0.86579359, -0.8322599, 0.]).set_height(0.0029955),
+            frame.animate.move_to([0.86579359, -0.8322599, 0.0]).set_height(0.0029955),
             rate_func=bezier([0, 0, 1, 1, 1, 1, 1, 1]),
             run_time=10,
         )
@@ -3621,12 +3632,10 @@ class SimpleFractalScene(IntroNewtonFractal):
             for i in range(n)
         }
         label = OldTex(
-            "p(z) = ", *(
-                f"(z - r_{i})"
-                for i in range(1, n + 1)
-            ),
+            "p(z) = ",
+            *(f"(z - r_{i})" for i in range(1, n + 1)),
             tex_to_color_map=t2c,
-            font_size=36
+            font_size=36,
         )
         label.to_corner(UL)
         label.set_stroke(BLACK, 5, background=True)
@@ -3639,6 +3648,7 @@ class SimpleFractalScene(IntroNewtonFractal):
     def get_root_label(self, root_dot, n):
         def get_z():
             return self.plane.p2n(root_dot.get_center())
+
         label = VGroup(
             OldTex(f"r_{n} = "),
             DecimalNumber(get_z(), include_sign=True),
@@ -3714,19 +3724,22 @@ class StudentAsksAboutComplexity(TeacherStudentsScene):
             self.teacher.change("shruggie"),
         )
         self.wait()
-        self.play(LaggedStart(
-            PiCreatureSays(
-                self.teacher, OldTexText("Math is what\\\\it is"),
-                target_mode="well",
-                bubble_config={
-                    "height": 3,
-                    "width": 4,
-                }
-            ),
-            self.students[1].change("maybe"),
-            self.students[2].change("sassy"),
-            lag_ratio=0.7,
-        ))
+        self.play(
+            LaggedStart(
+                PiCreatureSays(
+                    self.teacher,
+                    OldTexText("Math is what\\\\it is"),
+                    target_mode="well",
+                    bubble_config={
+                        "height": 3,
+                        "width": 4,
+                    },
+                ),
+                self.students[1].change("maybe"),
+                self.students[2].change("sassy"),
+                lag_ratio=0.7,
+            )
+        )
         self.wait(2)
 
         why = self.students[0].bubble.content[0][:3]
@@ -3740,10 +3753,14 @@ class StudentAsksAboutComplexity(TeacherStudentsScene):
             why.animate.set_color(YELLOW),
             Write(question),
             ShowCreation(arrow),
-            LaggedStart(*(
-                pi.change(mode, question)
-                for pi, mode in zip(self.pi_creatures, ("well", "erm", "sassy", "hesitant"))
-            ))
+            LaggedStart(
+                *(
+                    pi.change(mode, question)
+                    for pi, mode in zip(
+                        self.pi_creatures, ("well", "erm", "sassy", "hesitant")
+                    )
+                )
+            ),
         )
         self.wait(2)
 
@@ -3782,23 +3799,24 @@ class PeculiarBoundaryProperty(Scene):
 
         subtitle = OldTexText(
             "Boundary of one color",
-            " = "
-            "Boundary of any other",
+            " = " "Boundary of any other",
             tex_to_color_map={
                 "one color": BLUE_D,
                 "any other": RED_D,
-            }
+            },
         )
         subtitle.next_to(underline, DOWN, MED_LARGE_BUFF)
 
         # Setup for planes
-        grid = VGroup(*(
-            ComplexPlane(
-                x_range=(-3, 3),
-                y_range=(-2, 2),
+        grid = VGroup(
+            *(
+                ComplexPlane(
+                    x_range=(-3, 3),
+                    y_range=(-2, 2),
+                )
+                for n in range(6)
             )
-            for n in range(6)
-        ))
+        )
 
         grid.arrange_in_grid(2, 3, v_buff=2, h_buff=3)
         grid.set_width(FRAME_WIDTH - 2)
@@ -3819,20 +3837,19 @@ class PeculiarBoundaryProperty(Scene):
         )
 
         # Fractals
-        fractals = Group(*(
-            NewtonFractal(plane, coefs=self.coefs, colors=self.colors)
-            for plane in grid
-        ))
+        fractals = Group(
+            *(
+                NewtonFractal(plane, coefs=self.coefs, colors=self.colors)
+                for plane in grid
+            )
+        )
         alpha = 0.2
         for k in 0, 3:
             fractals[0 + k].set_opacities(alpha, 1, alpha)
             fractals[1 + k].set_opacities(alpha, alpha, 1)
             fractals[2 + k].set_opacities(1, alpha, alpha)
 
-        boxes = VGroup(*(
-            SurroundingRectangle(fractal, buff=0)
-            for fractal in fractals
-        ))
+        boxes = VGroup(*(SurroundingRectangle(fractal, buff=0) for fractal in fractals))
         boxes.set_stroke(GREY_B, 1)
 
         # Initial fractal
@@ -3862,18 +3879,15 @@ class PeculiarBoundaryProperty(Scene):
             )
 
         self.add(underline, title)
+        self.play(ShowCreation(underline), GrowFromCenter(big_julia, run_time=4))
         self.play(
-            ShowCreation(underline),
-            GrowFromCenter(big_julia, run_time=4)
-        )
-        self.play(
-            big_julia.animate.set_julia_highlight(0.02).set_colors(CUBIC_COLORS).set_opacity(0)
+            big_julia.animate.set_julia_highlight(0.02)
+            .set_colors(CUBIC_COLORS)
+            .set_opacity(0)
         )
         self.wait()
 
-        self.play(
-            big_fractal.animate.set_opacities(alpha, alpha, 1)
-        )
+        self.play(big_fractal.animate.set_opacities(alpha, alpha, 1))
         self.wait()
 
         self.play(
@@ -3909,10 +3923,9 @@ class DefineBoundary(Scene):
         blob = VMobject()
         blob.set_fill(BLUE_E, 1)
         blob.set_stroke(width=0)
-        blob.set_points_as_corners([
-            (1 + 0.3 * random.random()) * p
-            for p in compass_directions(12)
-        ])
+        blob.set_points_as_corners(
+            [(1 + 0.3 * random.random()) * p for p in compass_directions(12)]
+        )
         blob.close_path()
         blob.set_height(3)
         blob.set_width(1.0, stretch=True)
@@ -3951,7 +3964,7 @@ class DefineBoundary(Scene):
         self.play(
             FadeIn(boundary_word),
             ShowCreation(outline, **kw),
-            MoveAlongPath(point, blob, **kw)
+            MoveAlongPath(point, blob, **kw),
         )
         self.play(FadeOut(outline))
 
@@ -3963,7 +3976,7 @@ class DefineBoundary(Scene):
 
         self.play(
             MoveToTarget(boundary_word),
-            FadeTransform(boundary_word.copy(), formally_word)
+            FadeTransform(boundary_word.copy(), formally_word),
         )
         self.wait()
 
@@ -3981,11 +3994,11 @@ class DefineBoundary(Scene):
         self.add(group, point, circle)
         self.play(
             ApplyMethod(
-                group.scale, 2, {"about_point": point.get_center()},
-                run_time=4
+                group.scale, 2, {"about_point": point.get_center()}, run_time=4
             ),
             ApplyMethod(
-                circle.set_height, 0.5,
+                circle.set_height,
+                0.5,
                 run_time=2,
             ),
         )
@@ -3996,24 +4009,20 @@ class DefineBoundary(Scene):
         inside_words.next_to(circle, DOWN, buff=0.5).shift(0.5 * LEFT)
         outside_words.next_to(circle, UP, buff=0.5).shift(0.5 * RIGHT)
         inside_arrow = Arrow(
-            inside_words, point,
+            inside_words,
+            point,
             stroke_width=3,
             buff=0.1,
         )
         outside_arrow = Arrow(
-            outside_words, point,
+            outside_words,
+            point,
             stroke_width=3,
             buff=0.1,
         )
 
-        self.play(
-            FadeIn(inside_words),
-            ShowCreation(inside_arrow)
-        )
-        self.play(
-            FadeIn(outside_words),
-            ShowCreation(outside_arrow)
-        )
+        self.play(FadeIn(inside_words), ShowCreation(inside_arrow))
+        self.play(FadeIn(outside_words), ShowCreation(outside_arrow))
         self.wait()
 
         # Show interior
@@ -4022,8 +4031,9 @@ class DefineBoundary(Scene):
         self.play(
             point_group.animate.shift(circle.get_height() * DOWN / 4),
             LaggedStartMap(
-                FadeOut, VGroup(inside_words, inside_arrow, outside_words, outside_arrow)
-            )
+                FadeOut,
+                VGroup(inside_words, inside_arrow, outside_words, outside_arrow),
+            ),
         )
         self.wait()
         self.play(circle.animate.set_height(0.2))
@@ -4050,10 +4060,7 @@ class DefineBoundary(Scene):
         point_group.target[1].set_stroke(width=0.1)
 
         self.play(MoveToTarget(point_group))
-        self.play(
-            MoveToTarget(frame),
-            run_time=4
-        )
+        self.play(MoveToTarget(frame), run_time=4)
 
 
 class VariousCirclesOnTheFractal(SimpleFractalScene):
@@ -4071,11 +4078,13 @@ class VariousCirclesOnTheFractal(SimpleFractalScene):
         # Setup samples
         n_steps = 20
         density = self.sample_density
-        samples = np.array([
-            [complex(x, y), 0]
-            for x in np.arange(0, 2, density)
-            for y in np.arange(0, 2, density)
-        ])
+        samples = np.array(
+            [
+                [complex(x, y), 0]
+                for x in np.arange(0, 2, density)
+                for y in np.arange(0, 2, density)
+            ]
+        )
         roots = coefficients_to_roots(self.coefs)
         for i in range(len(samples)):
             z = samples[i, 0]
@@ -4135,17 +4144,11 @@ class VariousCirclesOnTheFractal(SimpleFractalScene):
         self.play(circle.animate.move_to(point).set_height(0.1))
         self.wait()
         for xy in (0.6, 0.4), (0.2, 0.6):
-            self.play(
-                circle.animate.move_to(plane.c2p(*xy)),
-                run_time=4
-            )
+            self.play(circle.animate.move_to(plane.c2p(*xy)), run_time=4)
             self.wait()
 
         # Back to larger
-        self.play(
-            Restore(frame),
-            circle.animate.set_height(0.5)
-        )
+        self.play(Restore(frame), circle.animate.set_height(0.5))
         self.wait()
 
         # Show smooth boundary
@@ -4156,24 +4159,19 @@ class VariousCirclesOnTheFractal(SimpleFractalScene):
             curr_value = count_tracker.get_value()
             return UpdateFromAlphaFunc(
                 count_tracker,
-                lambda m, a: m.set_value(curr_value if a < alpha else new_value)
+                lambda m, a: m.set_value(curr_value if a < alpha else new_value),
             )
 
         fractal.set_n_steps(10)
-        self.play(
-            fractal.animate.set_n_steps(3),
-            run_time=2
-        )
+        self.play(fractal.animate.set_n_steps(3), run_time=2)
         self.play(
             circle.animate.move_to(plane.c2p(0, 0.3)),
             change_count_at(2, 0.75),
-            run_time=2
+            run_time=2,
         )
         self.wait()
         self.play(
-            circle.animate.move_to(plane.c2p(0, 0)),
-            change_count_at(3, 0.5),
-            run_time=2
+            circle.animate.move_to(plane.c2p(0, 0)), change_count_at(3, 0.5), run_time=2
         )
         self.wait()
         self.play(
@@ -4182,13 +4180,13 @@ class VariousCirclesOnTheFractal(SimpleFractalScene):
                 change_count_at(2, 0.9),
                 change_count_at(3, 0.7),
             ),
-            run_time=3
+            run_time=3,
         )
         self.play(
             circle.animate.set_height(0.1).move_to(plane.c2p(-0.6, 0.24)),
             change_count_at(2, 0.8),
             frame.animate.set_height(2.5).move_to(plane.c2p(-0.5, 0.5)),
-            run_time=3
+            run_time=3,
         )
         self.wait(2)
         self.play(
@@ -4201,25 +4199,19 @@ class VariousCirclesOnTheFractal(SimpleFractalScene):
         # Just show boundary
         boundary = fractal.copy()
         boundary.set_colors(3 * [WHITE])
-        boundary.add_updater(
-            lambda m: m.set_julia_highlight(get_frame_ratio() * 1e-3)
-        )
+        boundary.add_updater(lambda m: m.set_julia_highlight(get_frame_ratio() * 1e-3))
         boundary.set_n_steps(50)
 
         frame.generate_target()
         frame.target.set_height(0.0018),
-        frame.target.move_to([-1.15535091, 0.23001433, 0.])
+        frame.target.move_to([-1.15535091, 0.23001433, 0.0])
         self.play(
             FadeOut(circle),
             FadeOut(words),
             FadeOut(self.root_dots),
             GrowFromCenter(boundary, run_time=3),
             fractal.animate.set_opacity(0.35),
-            MoveToTarget(
-                frame,
-                run_time=10,
-                rate_func=bezier([0, 0, 1, 1, 1, 1, 1])
-            ),
+            MoveToTarget(frame, run_time=10, rate_func=bezier([0, 0, 1, 1, 1, 1, 1])),
         )
         self.wait()
 
@@ -4255,12 +4247,15 @@ class ZoomInOnCubic(ThreeRootFractal):
         center_tracker = VectorizedPoint(ORIGIN)
 
         frame.add_updater(lambda m: m.move_to(center_tracker))
-        frame.add_updater(lambda m: m.set_height(FRAME_HEIGHT * 2**(-get_height_exp())))
+        frame.add_updater(
+            lambda m: m.set_height(FRAME_HEIGHT * 2 ** (-get_height_exp()))
+        )
 
         self.play(
             ApplyMethod(center_tracker.move_to, [0.2986952, 1.11848235, 0], run_time=4),
             ApplyMethod(
-                height_exp_tracker.set_value, 7,
+                height_exp_tracker.set_value,
+                7,
                 run_time=15,
                 rate_func=bezier([0, 0, 1, 1]),
             ),
@@ -4271,11 +4266,9 @@ class ZoomInOnCubic(ThreeRootFractal):
 class BlobsOnBlobsOnBlobs(Scene):
     def construct(self):
         words = OldTexText(
-            "Blobs", *(
-                " on blobs " + ("\\\\" if n == 2 else "")
-                for n in range(6)
-            ),
-            "..."
+            "Blobs",
+            *(" on blobs " + ("\\\\" if n == 2 else "") for n in range(6)),
+            "...",
         )
         words.set_width(FRAME_WIDTH - 2)
         words.to_edge(UP)
@@ -4307,11 +4300,10 @@ class ThinkAboutWhatPropertyMeans(TeacherStudentsScene):
             bubble_config={
                 "height": 3,
                 "width": 4,
-            }
+            },
         )
         self.play_student_changes(
-            "pondering", "thinking", "pondering",
-            look_at=self.screen
+            "pondering", "thinking", "pondering", look_at=self.screen
         )
         self.wait(4)
 
@@ -4336,11 +4328,13 @@ class InterpretBoundaryProperty(RepeatedNewton):
         # Show sensitive point
         point = plane.c2p(-0.8, 0.4)
         dots = self.dots = DotCloud()
-        dots.set_points([
-            [r * math.cos(theta), r * math.sin(theta), 0]
-            for r in np.linspace(0, 1, 20)
-            for theta in np.linspace(0, TAU, int(r * 20)) + random.random() * TAU
-        ])
+        dots.set_points(
+            [
+                [r * math.cos(theta), r * math.sin(theta), 0]
+                for r in np.linspace(0, 1, 20)
+                for theta in np.linspace(0, TAU, int(r * 20)) + random.random() * TAU
+            ]
+        )
         dots.set_height(2).center()
         dots.filter_out(lambda p: get_norm(p) > 1)
         dots.set_height(0.3)
@@ -4357,30 +4351,25 @@ class InterpretBoundaryProperty(RepeatedNewton):
             root_dots = self.root_dots
             if plane.p2n(dots.get_center()).real < -1.25:
                 root_dots = [root_dots[4]]
-            return VGroup(*(
-                Arrow(
-                    dots, root_dot,
-                    buff=0.1,
-                    stroke_color=root_dot[0].get_color()
+            return VGroup(
+                *(
+                    Arrow(
+                        dots, root_dot, buff=0.1, stroke_color=root_dot[0].get_color()
+                    )
+                    for root_dot in root_dots
                 )
-                for root_dot in root_dots
-            ))
+            )
 
         arrows = get_arrows()
 
-        self.play(
-            FadeIn(dots, scale=2),
-            FadeIn(sensitive_words, shift=0.25 * UP)
-        )
+        self.play(FadeIn(dots, scale=2), FadeIn(sensitive_words, shift=0.25 * UP))
         self.wait()
         self.play(ShowCreation(arrows[2]))
         self.play(ShowCreation(arrows[4]))
         self.wait()
         self.play(
             FadeOut(sensitive_words),
-            LaggedStartMap(ShowCreation, VGroup(*(
-                arrows[i] for i in (0, 1, 3)
-            )))
+            LaggedStartMap(ShowCreation, VGroup(*(arrows[i] for i in (0, 1, 3)))),
         )
         self.wait()
         arrows.add_updater(lambda m: m.become(get_arrows()))
@@ -4397,10 +4386,7 @@ class InterpretBoundaryProperty(RepeatedNewton):
         not_allowed.next_to(dots, RIGHT, SMALL_BUFF)
 
         arrows.clear_updaters()
-        self.play(
-            arrows[:2].animate.set_opacity(0),
-            FadeIn(not_allowed, scale=0.7)
-        )
+        self.play(arrows[:2].animate.set_opacity(0), FadeIn(not_allowed, scale=0.7))
         self.wait()
         self.play(FadeOut(arrows), FadeOut(not_allowed))
 
@@ -4436,7 +4422,9 @@ class CommentsOnNaming(Scene):
     def show_everyone(self):
         # Newton
         newton = get_figure(
-            "Newton", "Isaac Newton", "1643-1727",
+            "Newton",
+            "Isaac Newton",
+            "1643-1727",
             height=4,
         )
         newton.move_to(self.left_point)
@@ -4448,17 +4436,16 @@ class CommentsOnNaming(Scene):
         nf_label.align_to(newton_formula, UP)
         nf_label.set_x(self.right_point[0])
 
-        self.play(
-            FadeIn(newton_formula),
-            LaggedStartMap(FadeIn, newton)
-        )
+        self.play(FadeIn(newton_formula), LaggedStartMap(FadeIn, newton))
         self.wait()
         self.play(Write(nf_label))
         self.wait(2)
 
         # Hamilton
         hamilton = get_figure(
-            "Hamilton", "William Rowan Hamilton", "1805 - 1865",
+            "Hamilton",
+            "William Rowan Hamilton",
+            "1805 - 1865",
             height=4,
         )
         hamilton.move_to(self.left_point)
@@ -4481,15 +4468,12 @@ class CommentsOnNaming(Scene):
                 FadeIn(hamilton, shift=0.25 * LEFT),
                 FadeIn(hamiltons_equation, shift=0.25 * LEFT),
                 FadeIn(hamiltonians, shift=0.25 * RIGHT),
-            )
+            ),
         )
         self.wait(2)
 
         # Fourier
-        fourier = get_figure(
-            "Joseph Fourier", "Joseph Fourier", "1768-1830",
-            height=4
-        )
+        fourier = get_figure("Joseph Fourier", "Joseph Fourier", "1768-1830", height=4)
         fourier.move_to(self.left_point)
         fourier_transform = OldTex(
             r"f(t)=\int_{0}^{\infty}(a(\lambda) \cos (2 \pi \lambda t)+b(\lambda) \sin (2 \pi \lambda t)) d \lambda"
@@ -4533,11 +4517,7 @@ class CommentsOnNaming(Scene):
             FFT_diagram.animate.scale(1 / 3).match_y(people.target[2]),
         )
 
-        arrow = Arrow(
-            fourier, FFT_diagram,
-            buff=1.0,
-            stroke_width=8
-        )
+        arrow = Arrow(fourier, FFT_diagram, buff=1.0, stroke_width=8)
         arrows = VGroup(
             arrow.copy().match_y(newton),
             arrow.copy().match_y(hamilton),
@@ -4553,11 +4533,13 @@ class MakeFunOfNextVideo(TeacherStudentsScene):
             OldTexText("``Next part''...I've\\\\heard that before."),
             target_mode="sassy",
             index=2,
-            added_anims=[LaggedStart(
-                self.teacher.change("guilty"),
-                self.students[0].change("sassy"),
-                self.students[1].change("hesitant"),
-            )]
+            added_anims=[
+                LaggedStart(
+                    self.teacher.change("guilty"),
+                    self.students[0].change("sassy"),
+                    self.students[1].change("hesitant"),
+                )
+            ],
         )
         self.wait()
         self.teacher_says(
@@ -4569,7 +4551,7 @@ class MakeFunOfNextVideo(TeacherStudentsScene):
             target_mode="speaking",
             added_anims=[
                 self.students[0].change("hesitant"),
-            ]
+            ],
         )
         self.wait(3)
 
@@ -4587,10 +4569,7 @@ class Thanks(Scene):
         morty = Mortimer(mode="happy")
         thanks = Text("Thank you")
         thanks.next_to(morty, LEFT)
-        self.play(
-            morty.change("gracious"),
-            FadeIn(thanks, lag_ratio=0.1)
-        )
+        self.play(morty.change("gracious"), FadeIn(thanks, lag_ratio=0.1))
         for n in range(5):
             self.play(morty.animate.look([DL, DR][n % 2]))
             self.wait(random.random() * 5)
@@ -4619,14 +4598,13 @@ class HolomorphicDynamics(Scene):
         question = Text("Why is this true?")
         question.to_corner(UR)
         arrow = Arrow(
-            question.get_left(), image.target.get_top() + RIGHT,
-            path_arc=45 * DEGREES
+            question.get_left(), image.target.get_top() + RIGHT, path_arc=45 * DEGREES
         )
 
         self.play(
             image.animate.set_height(6).to_corner(DL),
             Write(question),
-            ShowCreation(arrow, rate_func=squish_rate_func(smooth, 0.5, 1), run_time=2)
+            ShowCreation(arrow, rate_func=squish_rate_func(smooth, 0.5, 1), run_time=2),
         )
         self.wait()
 
@@ -4645,9 +4623,7 @@ class HolomorphicDynamics(Scene):
         self.image = image
 
     def repeated_functions(self):
-        basic_expr = OldTex(
-            "z", "\\rightarrow ", " f(z)"
-        )
+        basic_expr = OldTex("z", "\\rightarrow ", " f(z)")
         fz = basic_expr.get_part_by_tex("f(z)")
         basic_expr.next_to(self.title, DOWN, LARGE_BUFF)
         basic_expr.to_edge(LEFT, buff=LARGE_BUFF)
@@ -4674,10 +4650,7 @@ class HolomorphicDynamics(Scene):
         exponential = OldTex("a^z")
         exponential.next_to(brace, DOWN)
 
-        self.play(
-            FadeIn(basic_expr),
-            FadeOut(self.image)
-        )
+        self.play(FadeIn(basic_expr), FadeOut(self.image))
         self.wait()
         self.describe_holomorphic(fz, brace)
         self.wait()
@@ -4696,7 +4669,7 @@ class HolomorphicDynamics(Scene):
         self.wait()
         self.play(
             mandelbrot.animate.scale(0.7).next_to(newton, UP, LARGE_BUFF, LEFT),
-            FadeIn(exponential, DOWN)
+            FadeIn(exponential, DOWN),
         )
         self.wait()
 
@@ -4748,10 +4721,7 @@ class HolomorphicDynamics(Scene):
         underline.set_stroke(YELLOW, [1, *6 * [3], 1])
 
         self.add(underline, self.title)
-        self.play(
-            word.animate.set_fill(YELLOW),
-            ShowCreation(underline)
-        )
+        self.play(word.animate.set_fill(YELLOW), ShowCreation(underline))
 
         in_words = Text("Complex\ninputs", font_size=36)
         in_words.to_corner(UL)
@@ -4778,19 +4748,23 @@ class HolomorphicDynamics(Scene):
             ShowCreation(in_arrow),
             run_time=1,
         )
-        self.play(
-            GrowFromCenter(brace),
-            FadeIn(out_words, lag_ratio=0.05)
-        )
+        self.play(GrowFromCenter(brace), FadeIn(out_words, lag_ratio=0.05))
         self.wait()
         self.play(FadeIn(f_prime, 0.5 * DOWN))
         self.wait()
 
         self.play(
-            LaggedStartMap(FadeOut, VGroup(
-                in_words, in_arrow, out_words, f_prime, underline,
-            )),
-            word.animate.set_fill(WHITE)
+            LaggedStartMap(
+                FadeOut,
+                VGroup(
+                    in_words,
+                    in_arrow,
+                    out_words,
+                    f_prime,
+                    underline,
+                ),
+            ),
+            word.animate.set_fill(WHITE),
         )
 
 
@@ -4839,8 +4813,11 @@ class AmbientRepetition(Scene):
             )
             self.wait(0.5)
             to_fade = VGroup(
-                dot.copy(), z_label.copy(),
-                dot_copy, arrow, fz_label,
+                dot.copy(),
+                z_label.copy(),
+                dot_copy,
+                arrow,
+                fz_label,
             )
             dot.move_to(dot_copy)
             z_label.next_to(dot, UP, SMALL_BUFF)
@@ -4912,18 +4889,22 @@ class BriefMandelbrot(Scene):
             for n in range(self.n_iterations):
                 try:
                     z2 = z1**2 + c
-                    new_lines.append(Line(
-                        plane.n2p(z1),
-                        plane.n2p(z2),
-                        stroke_color=GREY,
-                        stroke_width=2,
-                    ))
-                    new_lines.append(Dot(
-                        plane.n2p(z2),
-                        fill_color=YELLOW,
-                        fill_opacity=0.5,
-                        radius=0.05,
-                    ))
+                    new_lines.append(
+                        Line(
+                            plane.n2p(z1),
+                            plane.n2p(z2),
+                            stroke_color=GREY,
+                            stroke_width=2,
+                        )
+                    )
+                    new_lines.append(
+                        Dot(
+                            plane.n2p(z2),
+                            fill_color=YELLOW,
+                            fill_opacity=0.5,
+                            radius=0.05,
+                        )
+                    )
                     z1 = z2
                 except Exception:
                     pass
@@ -4935,10 +4916,7 @@ class BriefMandelbrot(Scene):
         last_dot = Dot(plane.n2p(0)).scale(0)
         for line, dot in zip(lines[0:20:2], lines[1:20:2]):
             self.add(line, dot, c_dot)
-            self.play(
-                ShowCreation(line),
-                TransformFromCopy(last_dot, dot)
-            )
+            self.play(ShowCreation(line), TransformFromCopy(last_dot, dot))
             last_dot = dot
         self.remove(*lines)
         lines.add_updater(update_lines)
@@ -4954,10 +4932,7 @@ class BriefMandelbrot(Scene):
         rect.next_to(self.plane, LEFT, buff=0)
 
         self.add(image, rect, *self.mobjects)
-        self.play(
-            FadeIn(image, run_time=2),
-            self.plane.animate.set_opacity(0.5)
-        )
+        self.play(FadeIn(image, run_time=2), self.plane.animate.set_opacity(0.5))
 
     def on_mouse_press(self, point, button, mods):
         # TODO, copy-pasted, should factor out
@@ -5036,10 +5011,12 @@ class MetaFractal(IntroNewtonFractal):
         colors = ROOT_COLORS_DEEP[0::2]
         self.plane_config["faded_line_ratio"] = 3
         plane = self.get_plane()
-        root_dots = self.root_dots = VGroup(*(
-            Dot(plane.n2p(root), color=color)
-            for root, color in zip(self.fixed_roots, colors)
-        ))
+        root_dots = self.root_dots = VGroup(
+            *(
+                Dot(plane.n2p(root), color=color)
+                for root, color in zip(self.fixed_roots, colors)
+            )
+        )
         root_dots.set_stroke(BLACK, 3)
         fractal = MetaNewtonFractal(
             plane,
@@ -5047,16 +5024,17 @@ class MetaFractal(IntroNewtonFractal):
             colors=colors,
             n_steps=self.n_steps,
         )
-        fractal.add_updater(lambda f: f.set_fixed_roots([
-            plane.p2n(dot.get_center())
-            for dot in root_dots
-        ]))
+        fractal.add_updater(
+            lambda f: f.set_fixed_roots(
+                [plane.p2n(dot.get_center()) for dot in root_dots]
+            )
+        )
 
         self.add(fractal, plane)
         self.add(root_dots)
 
-        point1 = np.array([1.62070862, 1.68700851, 0.])
-        point2 = np.array([0.81263967, 2.84042313, 0.])
+        point1 = np.array([1.62070862, 1.68700851, 0.0])
+        point2 = np.array([0.81263967, 2.84042313, 0.0])
         height1 = 0.083
         height2 = 0.035
 
@@ -5065,11 +5043,7 @@ class MetaFractal(IntroNewtonFractal):
         frame.target.move_to(point1)
         frame.target.set_height(height1)
 
-        self.play(
-            MoveToTarget(frame),
-            run_time=10,
-            rate_func=bezier([0, 0, 1, 1])
-        )
+        self.play(MoveToTarget(frame), run_time=10, rate_func=bezier([0, 0, 1, 1]))
         self.wait()
         self.play(
             UpdateFromAlphaFunc(
@@ -5080,11 +5054,9 @@ class MetaFractal(IntroNewtonFractal):
                         interpolate(2, height2, a),
                         a,
                     ),
-                ).move_to(
-                    interpolate(point1, point2, a)
-                )
+                ).move_to(interpolate(point1, point2, a)),
             ),
-            run_time=10
+            run_time=10,
         )
 
 

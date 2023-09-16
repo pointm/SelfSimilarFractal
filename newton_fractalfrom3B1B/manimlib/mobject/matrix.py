@@ -1,0 +1,252 @@
+from __future__ import annotations
+
+import itertools as it
+
+import numpy as np
+
+from manimlib.constants import DEFAULT_MOBJECT_TO_MOBJECT_BUFFER
+from manimlib.constants import DOWN, LEFT, RIGHT, UP
+from manimlib.constants import WHITE
+from manimlib.mobject.numbers import DecimalNumber
+from manimlib.mobject.numbers import Integer
+from manimlib.mobject.shape_matchers import BackgroundRectangle
+from manimlib.mobject.svg.tex_mobject import Tex
+from manimlib.mobject.svg.tex_mobject import TexText
+from manimlib.mobject.types.vectorized_mobject import VGroup
+from manimlib.mobject.types.vectorized_mobject import VMobject
+
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from colour import Color
+    from typing import Union
+
+    import numpy.typing as npt
+
+    from manimlib.mobject.mobject import Mobject
+
+    ManimColor = Union[str, Color]
+
+
+VECTOR_LABEL_SCALE_FACTOR = 0.8
+
+
+def matrix_to_tex_string(matrix: npt.ArrayLike) -> str:
+    matrix = np.array(matrix).astype("str")
+    if matrix.ndim == 1:
+        matrix = matrix.reshape((matrix.size, 1))
+    n_rows, n_cols = matrix.shape
+    prefix = "\\left[ \\begin{array}{%s}" % ("c" * n_cols)
+    suffix = "\\end{array} \\right]"
+    rows = [
+        " & ".join(row)
+        for row in matrix
+    ]
+    return prefix + " \\\\ ".join(rows) + suffix
+
+
+def matrix_to_mobject(matrix: npt.ArrayLike) -> Tex:
+    return Tex(matrix_to_tex_string(matrix))
+
+
+def vector_coordinate_label(
+    vector_mob: VMobject,
+    integer_labels: bool = True,
+    n_dim: int = 2,
+    color: ManimColor = WHITE
+) -> Matrix:
+    vect = np.array(vector_mob.get_end())
+    if integer_labels:
+        vect = np.round(vect).astype(int)
+    vect = vect[:n_dim]
+    vect = vect.reshape((n_dim, 1))
+    label = Matrix(vect, add_background_rectangles_to_entries=True)
+    label.scale(VECTOR_LABEL_SCALE_FACTOR)
+
+    shift_dir = np.array(vector_mob.get_end())
+    if shift_dir[0] >= 0:  # Pointing right
+        shift_dir -= label.get_left() + DEFAULT_MOBJECT_TO_MOBJECT_BUFFER * LEFT
+    else:  # Pointing left
+        shift_dir -= label.get_right() + DEFAULT_MOBJECT_TO_MOBJECT_BUFFER * RIGHT
+    label.shift(shift_dir)
+    label.set_color(color)
+    label.rect = BackgroundRectangle(label)
+    label.add_to_back(label.rect)
+    return label
+
+
+class Matrix(VMobject):
+    """矩阵（元素套用 ``Tex``）"""
+    CONFIG = {
+        "v_buff": 0.8,
+        "h_buff": 1.3,
+        "bracket_h_buff": 0.2,
+        "bracket_v_buff": 0.25,
+        "add_background_rectangles_to_entries": False,
+        "include_background_rectangle": False,
+        "element_to_mobject": Tex,
+        "element_to_mobject_config": {},
+        "element_alignment_corner": DOWN,
+    }
+
+    def __init__(self, matrix: npt.ArrayLike, **kwargs):
+        """传入的 ``matrix`` 可以是二维数组，也可以是二维 ``ndarray``
+        数组中的元素会套在 ``Tex`` 中
+
+        - ``v_buff`` : 两元素竖直距离
+        - ``h_buff`` : 两元素水平距离
+        - ``bracket_h_buff`` : 左右括号与中间元素的距离
+        - ``bracket_v_buff`` : 左右括号高度超出中间元素的长度
+        - ``add_background_rectangles_to_entries`` : 给每个元素添加背景矩形（默认为False）
+        - ``include_background_rectangle`` : 给整个矩阵添加背景矩形（默认为False）
+        
+        **结构**:
+        
+        - ``Matrix[0]`` 为中间元素，从左到右从上到下依次编号（只有一维）
+          - ``Matrix.mob_matrix`` 为二维数组，包含所有中间元素（按照传入格式）
+        - ``Matrix[1]`` 为左括号（[）
+        - ``Matrix[2]`` 为右括号（]）
+        """
+        VMobject.__init__(self, **kwargs)
+        matrix = self.matrix = np.array(matrix, ndmin=2)
+        mob_matrix = self.matrix_to_mob_matrix(matrix)
+        self.organize_mob_matrix(mob_matrix)
+        # self.elements = VGroup(*mob_matrix.flatten())
+        self.elements = VGroup(*it.chain(*mob_matrix))
+        self.add(self.elements)
+        self.add_brackets()
+        self.center()
+        self.mob_matrix = mob_matrix
+        if self.add_background_rectangles_to_entries:
+            for mob in self.elements:
+                mob.add_background_rectangle()
+        if self.include_background_rectangle:
+            self.add_background_rectangle()
+
+    def matrix_to_mob_matrix(self, matrix: npt.ArrayLike) -> list[list[Mobject]]:
+        return [
+            [
+                self.element_to_mobject(item, **self.element_to_mobject_config)
+                for item in row
+            ]
+            for row in matrix
+        ]
+
+    def organize_mob_matrix(self, matrix: npt.ArrayLike):
+        for i, row in enumerate(matrix):
+            for j, elem in enumerate(row):
+                mob = matrix[i][j]
+                mob.move_to(
+                    i * self.v_buff * DOWN + j * self.h_buff * RIGHT,
+                    self.element_alignment_corner
+                )
+        return self
+
+    def add_brackets(self):
+        height = self.matrix.shape[0]
+        bracket_pair = Tex("".join([
+            "\\left[",
+            "\\begin{array}{c}",
+            *height * ["\\quad \\\\"],
+            "\\end{array}",
+            "\\right]",
+        ]))[0]
+        bracket_pair.set_height(
+            self.get_height() + 1 * self.bracket_v_buff
+        )
+        l_bracket = bracket_pair[:len(bracket_pair) // 2]
+        r_bracket = bracket_pair[len(bracket_pair) // 2:]
+        l_bracket.next_to(self, LEFT, self.bracket_h_buff)
+        r_bracket.next_to(self, RIGHT, self.bracket_h_buff)
+        self.add(l_bracket, r_bracket)
+        self.brackets = VGroup(l_bracket, r_bracket)
+        return self
+
+    def get_columns(self) -> VGroup:
+        return VGroup(*[
+            VGroup(*[row[i] for row in self.mob_matrix])
+            for i in range(len(self.mob_matrix[0]))
+        ])
+
+    def get_rows(self) -> VGroup:
+        return VGroup(*[
+            VGroup(*row)
+            for row in self.mob_matrix
+        ])
+
+    def set_column_colors(self, *colors: ManimColor):
+        """设置每列的颜色，传入多个 ``colors`` 表示每列颜色"""
+        columns = self.get_columns()
+        for color, column in zip(colors, columns):
+            column.set_color(color)
+        return self
+
+    def add_background_to_entries(self):
+        for mob in self.get_entries():
+            mob.add_background_rectangle()
+        return self
+
+    def get_mob_matrix(self) -> list[list[Mobject]]:
+        return self.mob_matrix
+
+    def get_entries(self) -> VGroup:
+        """获取所有元素（VGroup），同 ``Matrix.elements``"""
+        return self.elements
+
+    def get_brackets(self) -> VGroup:
+        return self.brackets
+
+
+class DecimalMatrix(Matrix):
+    """数字矩阵（元素套用 ``DecimalNumber``）"""
+    CONFIG = {
+        "element_to_mobject": DecimalNumber,
+        "element_to_mobject_config": {"num_decimal_places": 1}
+    }
+
+
+class IntegerMatrix(Matrix):
+    """整数矩阵（元素套用 ``Integer``）"""
+    CONFIG = {
+        "element_to_mobject": Integer,
+        "element_alignment_corner": UP,
+    }
+
+
+class MobjectMatrix(Matrix):
+    """由物体构成的矩阵（直接由物体构成矩阵）"""
+    CONFIG = {
+        "element_to_mobject": lambda m: m,
+    }
+
+
+def get_det_text(
+    matrix: Matrix,
+    determinant: int | str | None = None,
+    background_rect: bool = False,
+    initial_scale_factor: int = 2
+) -> VGroup:
+    """获取行列式的其余文字（det(matrix)=determinant）
+    
+    - ``matrix`` : 为要求行列式的矩阵
+    - ``determinant`` : 行列式的值，如果传入了，则包含 ``=determinant``
+    """
+    parens = Tex("(", ")")
+    parens.scale(initial_scale_factor)
+    parens.stretch_to_fit_height(matrix.get_height())
+    l_paren, r_paren = parens.split()
+    l_paren.next_to(matrix, LEFT, buff=0.1)
+    r_paren.next_to(matrix, RIGHT, buff=0.1)
+    det = TexText("det")
+    det.scale(initial_scale_factor)
+    det.next_to(l_paren, LEFT, buff=0.1)
+    if background_rect:
+        det.add_background_rectangle()
+    det_text = VGroup(det, l_paren, r_paren)
+    if determinant is not None:
+        eq = Tex("=")
+        eq.next_to(r_paren, RIGHT, buff=0.1)
+        result = Tex(str(determinant))
+        result.next_to(eq, RIGHT, buff=0.2)
+        det_text.add(eq, result)
+    return det_text
