@@ -264,6 +264,7 @@ class HilbertCurve(SelfSimilarSpaceFillingCurve):
         str(RIGHT + DOWN): RIGHT + DOWN,
     }
 
+
 class PeanoCurve(SelfSimilarSpaceFillingCurve):
     colors = [PURPLE, TEAL]
     offsets = [
@@ -300,33 +301,29 @@ class TestHilbertCurve(Scene):
             points = hilbert_curve.get_anchor_points()
             hilbert_curve.set_points_as_corners(points)
             hilbert_curve.colors = [RED, GREEN]
-            self.play(Create(hilbert_curve), run_time=i+1)
+            self.play(Create(hilbert_curve), run_time=i + 1)
             self.wait()
             hilbert_group.append(hilbert_curve)
 
-class TestPeanoCurve(Scene):
-    def construct(self):
-        hilbert_curve = PeanoCurve()
 
-        num = 4
-
-        for i in range(num):
-            hilbert_curve.order = i + 1
-            points = hilbert_curve.get_anchor_points()
-            hilbert_curve.set_points_as_corners(points)
-            hilbert_curve.set_color([RED, GREEN])
-            self.play(Create(hilbert_curve), run_time=i+1)
-            self.wait()
-
-class RenderCover2(Scene):
+class TestSetPoints(Scene):
+    # 探究不同的set_points方法对结果的影响
     def construct(self):
         peano_curve = PeanoCurve()
-        peano_curve.order = 3
-
+        peano_curve.order = 2
         points = peano_curve.get_anchor_points()
-        peano_curve.set_points_as_corners(points)
-        peano_curve.set_color([RED, YELLOW])
+        peano_curve.set_stroke(width=4)#设置线段宽度
 
-        self.add(peano_curve)
+        pe1 = peano_curve.copy()
+        pe1.colors = [RED, GREEN]
 
-          
+        peano_curve.set_points(points)
+        pe1.set_points_as_corners(points)
+
+        dots = VGroup()
+        for var in points:
+            dots.add(Dot(radius=0.01).move_to(var))
+        self.add(dots)
+        self.play(Create(pe1), run_time=2, rate_func = lambda t:t)
+        self.wait()
+        self.play(Create(peano_curve), run_time=2,)
