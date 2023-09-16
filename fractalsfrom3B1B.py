@@ -921,27 +921,61 @@ class TestPeanoCurve(Scene):
 class RenderCover2(Scene):
     # 探究不同的set_points方法对结果的影响
     def construct(self):
+        # #古典派自己撸的渲染方案，现在都不这么写了，因为我发现真正的连线的方案被放在父类里面了（悲
+        # peano_curve = PeanoCurve()
+        # peano_curve.order = 2
+        # points = peano_curve.get_anchor_points()
+        # peano_curve.set_stroke(width=4)  # 设置线段宽度
+
+        # pe1 = peano_curve.copy()
+        # pe1.colors = [RED, GREEN]
+
+        # peano_curve.set_points(points)
+        # pe1.set_points_as_corners(points)
+
+        # dots = VGroup()
+        # for var in points:
+        #     dots.add(Dot(radius=0.01).move_to(var))
+        # self.add(dots)
+        # self.play(Create(pe1), run_time=2, rate_func=lambda t: t)
+        # self.wait()
+        # self.play(
+        #     Create(peano_curve),
+        #     run_time=2,
+        # )
+
         peano_curve = PeanoCurve()
-        peano_curve.order = 2
-        points = peano_curve.get_anchor_points()
         peano_curve.set_stroke(width=4)  # 设置线段宽度
+        peano_curve.order = 2  # 这个是父类的一个特性，阶数，在子类得到继承，现在修改一下
 
-        pe1 = peano_curve.copy()
-        pe1.colors = [RED, GREEN]
 
-        peano_curve.set_points(points)
-        pe1.set_points_as_corners(points)
+        pe1 = peano_curve.copy()  # pe1曲线是跟原先的曲线相同的阶数与线段宽度，但是懒得再写阶数直接开始复制算了
+        peano_curve.init_points()
+        peano_curve.init_colors()  # 这个是父类的两个方法，调用了这两个方法就相当于把线连接好并且把颜色设置好了
+        # ，就不需要自己调用VMobject里面的get_anchor_points方法来自己撸了
+        peano_curve.scale(1.45)
 
-        dots = VGroup()
+        points = (
+            peano_curve.get_anchor_points()
+        )  # 获取曲线的锚点坐标，后续会用另一种VMobject的set_points方法来连线构成pe1
+        # 方便与本体的连线方法作比较
+
+        pe1.set_points(points)  # 用VMobject里面的set_points方法来连线
+
+        dots = VGroup()  # 创建一个vgroup，用来储存用原先的锚点坐标绘制的点对象
         for var in points:
-            dots.add(Dot(radius=0.01).move_to(var))
-        self.add(dots)
-        self.play(Create(pe1), run_time=2, rate_func=lambda t: t)
+            dots.add(Dot(radius=0.01).move_to(var*1.45))
+
+        self.add(dots)  # 在平面上加上基于这些锚点坐标的点
+
+        self.play(
+            Create(peano_curve), run_time=2, rate_func=lambda t: t
+        )  # 在平面上绘制pe1，用线性速度绘制
         self.wait()
         self.play(
-            Create(peano_curve),
+            Create(pe1.scale(1.45)),
             run_time=2,
-        )
+        )  # 绘制原先连线方式的peano曲线，绘制的速度为smooth，与线性速度做对比。
 
 
 class TriangleFillingCurve(SelfSimilarSpaceFillingCurve):
@@ -1345,7 +1379,8 @@ class SnakeCurve(FractalCurve):
                 result.append(curr)
         # 返回result
         return result
-    
+
+
 class TestSnakeCurve(Scene):
     def construct(self):
         num = 6
