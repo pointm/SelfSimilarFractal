@@ -1,5 +1,5 @@
 from manim_imports_ext import *
-
+from manim import *
 # Helpers
 
 
@@ -99,7 +99,7 @@ def poly_tex(coefs, prefix="P(x) = ", coef_color=RED_B):
         terms.append(str(coef))
         terms.append(x_power_tex(k))
     t2c = dict([(coef, coef_color) for coef in coefs])
-    return OldTex(*terms, tex_to_color_map=t2c)
+    return MathTex(*terms, tex_to_color_map=t2c)
 
 
 def factored_poly_tex(roots, prefix="P(x) = ", root_colors=[YELLOW, YELLOW]):
@@ -112,7 +112,7 @@ def factored_poly_tex(roots, prefix="P(x) = ", root_colors=[YELLOW, YELLOW]):
     for root_tex in root_texs:
         parts.extend(["(", "x", "-", root_tex, ")"])
     t2c = dict(((rt, root_color) for rt, root_color in zip(root_texs, root_colors)))
-    return OldTex(*parts, tex_to_color_map=t2c)
+    return MathTex(*parts, tex_to_color_map=t2c)
 
 
 def sym_poly_tex_args(roots, k, abbreviate=False):
@@ -148,10 +148,10 @@ def expanded_poly_tex(
         arg_separator=" ",
     )
     result = VGroup()
-    result.add(OldTex(f"x^{{{n}}}"))
+    result.add(MathTex(f"x^{{{n}}}"))
     for k in range(1, n + 1):
         sym_poly = sym_poly_tex_args(roots, k, abbreviate=abbreviate)
-        line = OldTex(
+        line = MathTex(
             "+" if k % 2 == 0 else "-",
             "\\big(",
             *sym_poly,
@@ -187,7 +187,7 @@ def get_symmetric_system(
     kw = dict(tex_to_color_map=t2c)
     equations = VGroup(
         *(
-            OldTex(
+            MathTex(
                 lhs,
                 "=",
                 "-(" if neg else "",
@@ -211,7 +211,7 @@ def get_quadratic_formula(lhs="", **tex_config):
 
 def get_full_cubic_formula(lhs="", **tex_config):
     # Thanks to Mathologer and MathPix here...
-    return OldTex(
+    return MathTex(
         lhs
         + """
         &\\sqrt[3]{\\left(-{ {b}^{3} \\over 27 {a}^{3}}+{ {b} {c} \\over 6 {a}^{2}}
@@ -339,7 +339,7 @@ class RootCoefScene(Scene):
         self.add(root_poly, coef_poly)
 
         if self.show_equals:
-            equals = OldTex("=")
+            equals = MathTex("=")
             equals.move_to(midpoint(root_poly.get_right(), coef_poly.get_left()))
             self.add(equals)
             self.poly_equal_sign = equals
@@ -356,7 +356,7 @@ class RootCoefScene(Scene):
 
     def get_coef_poly(self):
         degree = self.get_degree()
-        return OldTex(
+        return MathTex(
             f"x^{degree}",
             *(f" + c_{n} x^{n}" for n in range(degree - 1, 1, -1)),
             " + c_{1} x",
@@ -364,7 +364,7 @@ class RootCoefScene(Scene):
         )
 
     def get_root_poly(self):
-        return OldTex(*(f"(x - r_{i})" for i in range(self.get_degree())))
+        return MathTex(*(f"(x - r_{i})" for i in range(self.get_degree())))
 
     def add_dots(self):
         self.root_dots = VGroup()
@@ -528,13 +528,13 @@ class RootCoefScene(Scene):
 
     def add_r_labels(self):
         self.r_dot_labels = self.add_dot_labels(
-            VGroup(*(OldTex(f"r_{i}") for i in range(self.get_degree()))),
+            VGroup(*(MathTex(f"r_{i}") for i in range(self.get_degree()))),
             self.root_dots,
         )
 
     def add_c_labels(self):
         self.c_dot_labels = self.add_dot_labels(
-            VGroup(*(OldTex(f"c_{i}") for i in range(self.get_degree()))),
+            VGroup(*(MathTex(f"c_{i}") for i in range(self.get_degree()))),
             self.coef_dots,
         )
 
@@ -740,8 +740,8 @@ class RadicalScene(RootCoefScene):
         r_arrow = Arrow(left, right, **arrow_kw).shift(UP)
         l_arrow = Arrow(right, left, **arrow_kw).shift(DOWN)
 
-        r_label = OldTex(f"\\sqrt[{self.n}]{{c}}")[0]
-        l_label = OldTex(f"r_i^{{{self.n}}}")[0]
+        r_label = MathTex(f"\\sqrt[{self.n}]{{c}}")[0]
+        l_label = MathTex(f"r_i^{{{self.n}}}")[0]
         r_label[3].set_color(self.coef_color)
         l_label[-3::2].set_color(self.root_color)
 
@@ -771,7 +771,7 @@ class RadicalScene(RootCoefScene):
             )
         )
 
-        tex_mob = OldTex(sym, font_size=24)
+        tex_mob = MathTex(sym, font_size=24)
         tex_mob.set_backstroke(width=8)
 
         def update_sym(tex_mob):
@@ -792,14 +792,14 @@ class RadicalScene(RootCoefScene):
     # Updates to RootCoefScene methods
     def get_coef_poly(self):
         degree = self.get_degree()
-        return OldTex(f"x^{degree}", "-", "c")
+        return MathTex(f"x^{degree}", "-", "c")
 
     def get_c_symbols(self, coef_poly):
         return VGroup(coef_poly[-1])
 
     def add_c_labels(self):
         self.c_dot_labels = self.add_dot_labels(
-            VGroup(OldTex("c")),
+            VGroup(MathTex("c")),
             VGroup(self.coef_dots[0]),
         )
 
@@ -871,7 +871,7 @@ class QuadraticFormula(RootCoefScene):
         plane.set_height(self.plane_height)
         plane.add_coordinate_labels(font_size=24)
 
-        label = OldTex(
+        label = MathTex(
             "-{b \\over 2} \\pm \\sqrt{{b^2 \\over 4} - c}",
             font_size=30,
         )[0]
@@ -901,11 +901,11 @@ class QuadraticFormula(RootCoefScene):
         self.add(self.get_tracers(dots))
 
     def get_coef_poly(self):
-        return OldTex("x^2", "+ b x", "+ c")
+        return MathTex("x^2", "+ b x", "+ c")
 
     def add_c_labels(self):
         self.c_dot_labels = self.add_dot_labels(
-            VGroup(OldTex("c"), OldTex("b")), self.coef_dots
+            VGroup(MathTex("c"), MathTex("b")), self.coef_dots
         )
 
     def get_c_symbols(self, coef_poly):

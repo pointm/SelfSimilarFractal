@@ -1,5 +1,6 @@
-from manim_imports_ext import *
+# from manim_imports_ext import *
 from roots_and_coefs import *
+from manim import *
 
 
 class CubicFormula(RootCoefScene):
@@ -88,7 +89,7 @@ class CubicFormula(RootCoefScene):
             background_stroke_color=3,
         )
 
-        sqrt_label = OldTex(
+        sqrt_label = MathTex(
             "\\delta_1, \\delta_2 = \\sqrt{ \\frac{q^2}{4} + \\frac{p^3}{27}}",
             **kw
         )
@@ -96,8 +97,8 @@ class CubicFormula(RootCoefScene):
         sqrt_label.next_to(sqrt_plane, UP, SMALL_BUFF)
 
         crt_labels = VGroup(
-            OldTex("\\cdot", "= \\sqrt[3]{-\\frac{q}{2} + \\delta_1}", **kw),
-            OldTex("\\cdot", "= \\sqrt[3]{-\\frac{q}{2} + \\delta_2}", **kw),
+            MathTex("\\cdot", "= \\sqrt[3]{-\\frac{q}{2} + \\delta_1}", **kw),
+            MathTex("\\cdot", "= \\sqrt[3]{-\\frac{q}{2} + \\delta_2}", **kw),
         )
         for label, color in zip(crt_labels, self.crt_dot_colors):
             label[0].scale(4, about_edge=RIGHT)
@@ -106,7 +107,7 @@ class CubicFormula(RootCoefScene):
         crt_labels.arrange(RIGHT, buff=MED_LARGE_BUFF)
         crt_labels.next_to(crt_plane, UP, SMALL_BUFF)
 
-        cf_label = OldTex(
+        cf_label = MathTex(
             "\\sqrt[3]{ -\\frac{q}{2} + \\delta_1 } +",
             "\\sqrt[3]{ -\\frac{q}{2} + \\delta_2 }",
             # **kw  # TODO, What the hell is going on here...
@@ -128,7 +129,7 @@ class CubicFormula(RootCoefScene):
         self.cf_label = cf_label
 
     def get_coef_poly(self):
-        return OldTex(
+        return MathTex(
             "x^3 + {0}x^2 + {p}x + {q}",
             tex_to_color_map={
                 "{0}": self.coef_color,
@@ -175,7 +176,7 @@ class CubicFormula(RootCoefScene):
 
         # Labels
         self.delta_labels = self.add_dot_labels(
-            VGroup(OldTex("\\delta_1"), OldTex("\\delta_2")),
+            VGroup(MathTex("\\delta_1"), MathTex("\\delta_2")),
             sqrt_dots
         )
 
