@@ -1,0 +1,4 @@
+# This file is used internally by FFMPEG.
+file 'file:C:/Users/Feynman/Documents/00课件-2023春-2023秋/GitGubStatus/JuliaSetinManim/media/videos/fractalsBY3B1B/1080p60/partial_movie_files/RenderCover2/1413466013_2645082261_3653530899.mp4'
+file 'file:C:/Users/Feynman/Documents/00课件-2023春-2023秋/GitGubStatus/JuliaSetinManim/media/videos/fractalsBY3B1B/1080p60/partial_movie_files/RenderCover2/1672018281_3315967912_1261330540.mp4'
+file 'file:C:/Users/Feynman/Documents/00课件-2023春-2023秋/GitGubStatus/JuliaSetinManim/media/videos/fractalsBY3B1B/1080p60/partial_movie_files/RenderCover2/1672018281_1796936348_1687956830.mp4'
