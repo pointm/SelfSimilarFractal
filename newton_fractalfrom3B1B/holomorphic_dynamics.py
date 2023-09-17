@@ -1,5 +1,5 @@
 from manim_imports_ext import *
-from newton_fractalfrom3B1B import *
+from newton_fractal import *
 from roots_and_coefs import coefficients_to_roots
 from roots_and_coefs import roots_to_coefficients
 
@@ -63,7 +63,9 @@ def get_iteration_label(font_size=36):
     result.arrange(DOWN, buff=MED_LARGE_BUFF)
     return result
 
+
 ROOT_COLORS_DEEP = ["#440154", "#3b528b", "#21908c", "#5dc963", "#29abca"]
+
 
 class NewtonFractal(Mobject):
     CONFIG = {
@@ -86,9 +88,9 @@ class NewtonFractal(Mobject):
 
     def __init__(self, plane, **kwargs):
         super().__init__(
-            scale_factor=plane.get_x_unit_size(),
-            offset=plane.n2p(0),
-            **kwargs,
+            # scale_factor=plane.get_x_unit_size(),
+            # offset=plane.n2p(0),
+            # **kwargs,
         )
         self.replace(plane, stretch=True)
 
@@ -171,8 +173,6 @@ class NewtonFractal(Mobject):
     def set_opacity(self, opacity, recurse=True):
         self.set_opacities(*len(self.roots) * [opacity])
         return self
-
-
 
 
 class MandelbrotFractal(NewtonFractal):
@@ -3732,3 +3732,33 @@ class AmbientJulia(Scene):
 
         self.add(fractal, plane)
         self.play(t_tracker.animate.set_value(1), rate_func=linear, run_time=300)
+
+
+if __name__ == "__main__":
+    roots = coefficients_to_roots([1, 0, 0, -1])  # 传入系数矩阵，解方程x^3-1=0，并且获得根
+    import numpy as np
+
+    from manim import *
+
+    plane = ComplexPlane()
+
+    newton_fractal = NewtonFractal(plane)
+
+    # 设置牛顿分形的颜色
+    newton_fractal.set_colors(["red", "green", "blue"])
+
+    # 设置牛顿分形的复数多项式系数
+    newton_fractal.set_coefs([1.0, -1.0, 1.0, 0.0, 0.0, 1.0])
+
+    # 设置牛顿法迭代的次数
+    newton_fractal.set_n_steps(30)
+
+    # 设置牛顿分形的饱和度因子
+    newton_fractal.set_saturation_factor(0.5)
+
+    # 将牛顿分形添加到场景中
+    scene = Scene()
+    scene.add(newton_fractal)
+
+    # 渲染场景
+    scene.render()
