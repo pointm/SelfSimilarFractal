@@ -1,5 +1,6 @@
 from manim_imports_ext import *
 from manim import *
+
 # Helpers
 
 
@@ -46,6 +47,15 @@ def coefficients_to_roots(coefs):
         new_reversed_coefs, rem = np.polydiv(coefs[::-1], [1, -root])
         coefs = new_reversed_coefs[::-1]
     return roots
+
+
+"""
+这段代码的功能是用牛顿法求解多项式的根。牛顿法是一种数值方法，用于寻找函数的零点。它的基本思想是，从一个初始值开始，沿着函数的切线方向逼近零点，直到满足一定的精度或达到最大迭代次数为止。
+
+代码中定义了两个函数：find_root和coefficients_to_roots。find_root函数接受四个参数：func, dfunc, seed和tol。func是要求解的函数，dfunc是它的导数，seed是初始值，tol是容差。find_root函数用一个循环实现牛顿法的迭代过程，每次更新seed的值，直到收敛或超过最大步数。最后返回seed作为函数的根。
+
+coefficients_to_roots函数接受一个参数：coefs。coefs是一个列表，表示多项式的系数。例如，[1, -3, 2]表示x^2 - 3x + 2。coefficients_to_roots函数用一个循环实现多项式的分解过程，每次找到一个根，然后用多项式除法将其从多项式中消去，直到剩下一个常数项或零多项式为止。最后返回一个列表，包含所有的根。
+"""
 
 
 def get_nth_roots(z, n):
