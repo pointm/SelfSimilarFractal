@@ -111,8 +111,8 @@ class NewtonFractal(Mobject):
         )
         self.replace(plane, stretch=True)
 
-    # def init_data(self):
-    #     self.set_points([UL, DL, UR, DR])
+    def init_data(self):
+        self.set_points([UL, DL, UR, DR])
 
     def init_uniforms(self):
         super().init_uniforms()
