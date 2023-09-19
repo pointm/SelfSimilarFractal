@@ -141,30 +141,44 @@ class NewtonFractal(Mobject):
         self.uniforms["julia_highlight"] = value
 
     def set_coefs(self, coefs, reset_roots=True):
+        # 将 coefs 中的系数转换为复数
         full_coefs = [*coefs] + [0] * (self.max_degree - len(coefs) + 1)
+        coefs = list(map(complex, full_coefs))
+
+        # 将复数系数存储在 uniforms 属性中
         self.uniforms.update(
             {
                 f"coef{n}": np.array([coef.real, coef.imag], dtype=np.float64)
-                for n, coef in enumerate(map(complex, full_coefs))
+                for n, coef in enumerate(coefs)
             }
         )
+
+        # 如果 reset_roots 为 True，则重新计算并设置 mobject 的根
         if reset_roots:
-            self.set_roots(coefficients_to_roots([coef.real for coef in coefs]), False)
-        self.coefs = coefs
+            self.set_roots(coefficients_to_roots(coefs), False)
+
+        # 返回 mobject 本身
         return self
 
     def set_roots(self, roots, reset_coefs=True):
-        self.uniforms["n_roots"] = float(len(roots))
+        # 将 roots 中的根转换为复数
         full_roots = [*roots] + [0] * (self.max_degree - len(roots))
+        roots = list(map(complex, full_roots))
+
+        # 将复数根存储在 uniforms 属性中
+        self.uniforms["n_roots"] = float(len(roots))
         self.uniforms.update(
             {
                 f"root{n}": np.array([root.real, root.imag], dtype=np.float64)
-                for n, root in enumerate(map(complex, full_roots))
+                for n, root in enumerate(roots)
             }
         )
+
+        # 如果 reset_coefs 为 True，则重新计算并设置 mobject 的系数
         if reset_coefs:
             self.set_coefs(roots_to_coefficients(roots), False)
-        self.roots = roots
+
+        # 返回 mobject 本身
         return self
 
     def set_scale(self, scale_factor):
