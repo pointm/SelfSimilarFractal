@@ -1,4 +1,5 @@
 from time import sleep
+
 # from manim import *
 from manimlib import *
 from functools import reduce
@@ -465,39 +466,7 @@ class TestScene(Scene):
 
 
 if __name__ == "__main__":
-    roots = coefficients_to_roots([1, 0, 0, -1])  # 传入系数矩阵，解方程x^3-1=0，并且获得根
-    import numpy as np
-
-    from manim import *
-
-    plane = ComplexPlane()
-    # 生成一个十六进制字符串
-    hex_coefs = "0x1,-0x1,0x1,0,0,1"
-
-    # 使用十六进制字符串初始化系数
-    
-    newton_fractal = NewtonFractal(plane)
-    newton_fractal.set_coefs(hex_coefs)
-
-    # 调用init_data()方法
-    # newton_fractal.init_data()
-
-    # 设置牛顿分形的颜色
-    newton_fractal.set_colors(["red", "green", "blue"])
-
-    # 设置牛顿分形的复数多项式系数
-    newton_fractal.set_coefs([1.0, -1.0, 1.0, 0.0, 0.0, 1.0])
-
-    # 设置牛顿法迭代的次数
-    newton_fractal.set_n_steps(30)
-
-    # 设置牛顿分形的饱和度因子
-    newton_fractal.set_saturation_factor(0.5)
-
-    # 将牛顿分形添加到场景中
-    scene = Scene()
-    scene.add(newton_fractal)
-
-    # 渲染场景
-    scene.render()
-    sleep(10)
+    roots = coefficients_to_roots(
+        [1.0, -1.0, 1.0, 0.0, 0.0, 1.0]
+    )  # 传入系数矩阵，解方程z^5 + z^2 - z + 1 = 0，并且获得根
+    print([x**5 + x**2 - x**1 + 1 for x in roots])
