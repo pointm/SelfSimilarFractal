@@ -1,0 +1,3 @@
+# This file is used internally by FFMPEG.
+file 'file:C:/Users/Feynman/Documents/00课件-2023春-2023秋/GitGubStatus/SelfSimilarFractal/media/videos/JuliaSetinManim/480p15/partial_movie_files/NewJulia/4012571485_2070652787_1248922511.mp4'
+file 'file:C:/Users/Feynman/Documents/00课件-2023春-2023秋/GitGubStatus/SelfSimilarFractal/media/videos/JuliaSetinManim/480p15/partial_movie_files/NewJulia/3328457300_3315967912_3835347691.mp4'
