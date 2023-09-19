@@ -90,11 +90,12 @@ class NewtonFractal(Mobject):
         self.n_roots = []
         self.roots = []
 
-        self.set_colors(colors=self.colors)
-        self.set_julia_highlight(self)
-        self.set_coefs(coefs=self.coefs)
-        self.set_scale(self)
-        self.set_offset(self)
+        super().__init__()
+        self.set_colors(self.colors)
+        self.set_julia_highlight(self.julia_highlight)
+        self.set_coefs(self.coefs)
+        self.set_scale(self.scale_factor)
+        self.set_offset(self.offset)
         self.set_n_steps(self.n_steps)
         self.set_saturation_factor(self.saturation_factor)
         self.set_opacity(self.opacity)
@@ -422,16 +423,20 @@ class TestScene(Scene):
 
     def construct(self):
         # Introduce terms
-        j_group = self.get_fractals()
+        coefs = [-1.5, 1.5, 1j, -1j]
+        j_plane = ComplexPlane()
+        julia = NewtonFractal(j_plane, coefs=coefs, colors=5 * [GREY_A])
+        julia.set_julia_highlight(1e-3)
         f_name, j_name = VGroup(
             Text("Fatou set"),
             Text("Julia set"),
         )
+        print(julia.get_all_points())
         # f_name.next_to(f_group, UP, MED_LARGE_BUFF)
         # j_name.next_to(j_group, UP, MED_LARGE_BUFF)
 
         # self.play(Write(j_name), GrowFromCenter(j_group))
-        self.wait()
+        self.add(julia)
         # self.play(Write(f_name), *map(GrowFromCenter, f_group))
         # self.wait()
 
@@ -446,7 +451,7 @@ class TestScene(Scene):
         # f_line.set_stroke(WHITE, 1)
 
         # self.play(FadeOut(j_name, RIGHT), FadeOut(j_group, RIGHT))  # , Write(lhs))
-        self.wait()
+        # self.wait()
         # for words in lhs[-1]:
         #     self.play(Indicate(words, buff=0, time_width=1.5))
         # self.play(Write(arrow))
