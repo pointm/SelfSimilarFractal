@@ -1,7 +1,8 @@
 from time import sleep
 
-# from manim import *
-from manimlib import *
+from manim import *
+
+# from manimlib import *
 from functools import reduce
 import random
 import itertools as it
@@ -68,24 +69,6 @@ ROOT_COLORS_DEEP = ["#440154", "#3b528b", "#21908c", "#5dc963", "#29abca"]
 
 
 class NewtonFractal(Mobject):
-    # CONFIG = {
-    #     "shader_folder": "newton_fractal",
-    #     "shader_dtype": [
-    #         ("point", np.float32, (3,)),
-    #     ],
-    #     "colors": ROOT_COLORS_DEEP,
-    #     "coefs": [1.0, -1.0, 1.0, 0.0, 0.0, 1.0],
-    #     "scale_factor": 1.0,
-    #     "offset": ORIGIN,
-    #     "n_steps": 30,
-    #     "julia_highlight": 0.0,
-    #     "max_degree": 5,
-    #     "saturation_factor": 0.0,
-    #     "opacity": 1.0,
-    #     "black_for_cycles": False,
-    #     "is_parameter_space": False,
-    # }
-    # data = Mobject.set_points(UL, DL)
     def __init__(self, plane, **kwargs):
         self.shader_folder = "newton_fractal"
         self.shader_dtype = [
@@ -102,43 +85,42 @@ class NewtonFractal(Mobject):
         self.opacity = 1.0
         self.black_for_cycles = False
         self.is_parameter_space = False
-        # self.data = self.set_points([UL, DL, UR, DR])
+        self.data = self.set_points([UL, DL, UR, DR])
+        self.colorn = []
+        self.n_roots = []
+        self.roots = []
 
-        super().__init__(**kwargs)
-        super().__init__(
-            scale_factor=plane.get_x_unit_size(),
-            offset=plane.n2p(0),
-            **kwargs,
-        )
-        self.replace(plane, stretch=True)
+        self.set_colors(colors=self.colors)
+        self.set_julia_highlight(self)
+        self.set_coefs(coefs=self.coefs)
+        self.set_scale(self)
+        self.set_offset(self)
+        self.set_n_steps(self.n_steps)
+        self.set_saturation_factor(self.saturation_factor)
+        self.set_opacity(self.opacity)
+        black_for_cycles = float()
+        is_parameter_space = float()
+
+        # super().__init__(**kwargs)
+        # super().__init__(
+        #     scale_factor=plane.get_x_unit_size(),
+        #     offset=plane.n2p(0),
+        #     **kwargs,
+        # )
+        # self.replace(plane, stretch=True)
 
     def init_data(self):
         self.set_points([UL, DL, UR, DR])
 
-    def init_uniforms(self):
-        super().init_uniforms()
-        self.set_colors(self.colors)
-        self.set_julia_highlight(self.julia_highlight)
-        self.set_coefs(self.coefs)
-        self.set_scale(self.scale_factor)
-        self.set_offset(self.offset)
-        self.set_n_steps(self.n_steps)
-        self.set_saturation_factor(self.saturation_factor)
-        self.set_opacity(self.opacity)
-        self.uniforms["black_for_cycles"] = float(self.black_for_cycles)
-        self.uniforms["is_parameter_space"] = float(self.is_parameter_space)
+    # def init_uniforms(self):
 
     def set_colors(self, colors):
-        self.uniforms.update(
-            {
-                f"color{n}": np.array(color_to_rgba(color))
-                for n, color in enumerate(colors)
-            }
-        )
+        for n, color in enumerate(colors):
+            self.colorn.append(np.array(color_to_rgba(color)))
         return self
 
     def set_julia_highlight(self, value):
-        self.uniforms["julia_highlight"] = value
+        self.julia_highlight = value
 
     def set_coefs(self, coefs, reset_roots=True):
         # 将 coefs 中的系数转换为复数
@@ -146,12 +128,10 @@ class NewtonFractal(Mobject):
         coefs = list(map(complex, full_coefs))
 
         # 将复数系数存储在 uniforms 属性中
-        self.uniforms.update(
-            {
-                f"coef{n}": np.array([coef.real, coef.imag], dtype=np.float64)
-                for n, coef in enumerate(coefs)
-            }
-        )
+        self.coefs = [
+            np.array([coef.real, coef.imag], dtype=np.float64)
+            for n, coef in enumerate(coefs)
+        ]
 
         # 如果 reset_roots 为 True，则重新计算并设置 mobject 的根
         if reset_roots:
@@ -160,19 +140,17 @@ class NewtonFractal(Mobject):
         # 返回 mobject 本身
         return self
 
-    def set_roots(self, roots, reset_coefs=True):
+    def set_roots(self, roots = [1], reset_coefs=True):
         # 将 roots 中的根转换为复数
         full_roots = [*roots] + [0] * (self.max_degree - len(roots))
         roots = list(map(complex, full_roots))
 
         # 将复数根存储在 uniforms 属性中
-        self.uniforms["n_roots"] = float(len(roots))
-        self.uniforms.update(
-            {
-                f"root{n}": np.array([root.real, root.imag], dtype=np.float64)
-                for n, root in enumerate(roots)
-            }
-        )
+        self.n_roots = float(len(roots))
+        self.n_roots = [
+            np.array([root.real, root.imag], dtype=np.float64)
+            for n, root in enumerate(roots)
+        ]
 
         # 如果 reset_coefs 为 True，则重新计算并设置 mobject 的系数
         if reset_coefs:
@@ -182,24 +160,24 @@ class NewtonFractal(Mobject):
         return self
 
     def set_scale(self, scale_factor):
-        self.uniforms["scale_factor"] = scale_factor
+        self.scale_factor = scale_factor
         return self
 
     def set_offset(self, offset):
-        self.uniforms["offset"] = np.array(offset)
+        self.offset = np.array(offset)
         return self
 
     def set_n_steps(self, n_steps):
-        self.uniforms["n_steps"] = float(n_steps)
+        self.n_steps = float(n_steps)
         return self
 
     def set_saturation_factor(self, saturation_factor):
-        self.uniforms["saturation_factor"] = float(saturation_factor)
+        self.saturation_factor = float(saturation_factor)
         return self
 
     def set_opacities(self, *opacities):
         for n, opacity in enumerate(opacities):
-            self.uniforms[f"color{n}"][3] = opacity
+            self.color[n][3] = opacity
         return self
 
     def set_opacity(self, opacity, recurse=True):
@@ -407,22 +385,22 @@ class TestScene(Scene):
         colors = self.colors
         f_planes = VGroup(*(self.get_plane() for x in range(n)))
         f_planes.arrange(RIGHT, buff=LARGE_BUFF)
-        plusses = [Tex("+") for _ in range(n - 1)]  # Tex("+").replicate(n - 1)
-        f_group = Group(*it.chain(*zip(f_planes, plusses)))
-        f_group.add(f_planes[-1])
-        f_group.arrange(RIGHT)
-        fatou = Group(
-            *(
-                NewtonFractal(f_plane, coefs=coefs, colors=colors)
-                for f_plane in f_planes
-            )
-        )
-        for i, fractal in enumerate(fatou):
-            opacities = n * [0.2]
-            opacities[i] = 1
-            fractal.set_opacities(*opacities)
-        f_group.add(*fatou)
-        f_group.set_y(fy)
+        # plusses = [Tex("+") for _ in range(n - 1)]  # Tex("+").replicate(n - 1)
+        # f_group = Group(*it.chain(*zip(f_planes, plusses)))
+        # f_group.add(f_planes[-1])
+        # f_group.arrange(RIGHT)
+        # fatou = Group(
+        #     *(
+        #         NewtonFractal(f_plane, coefs=coefs, colors=colors)
+        #         for f_plane in f_planes
+        #     )
+        # )
+        # for i, fractal in enumerate(fatou):
+        #     opacities = n * [0.2]
+        #     opacities[i] = 1
+        #     fractal.set_opacities(*opacities)
+        # f_group.add(*fatou)
+        # f_group.set_y(fy)
 
         j_plane = self.get_plane()
         j_plane.set_y(jy)
@@ -430,31 +408,32 @@ class TestScene(Scene):
         julia.set_julia_highlight(1e-3)
         j_group = Group(julia, j_plane)
 
-        for fractal, plane in zip((*fatou, julia), (*f_planes, j_plane)):
-            fractal.plane = plane
-            fractal.add_updater(
-                lambda m: m.set_offset(m.plane.get_center())
-                .set_scale(m.plane.get_x_unit_size())
-                .replace(m.plane)
-            )
+        # for fractal, plane in zip((*fatou, julia), (*f_planes, j_plane)):
+        #     fractal.plane = plane
+        #     fractal.add_updater(
+        #         lambda m: m.set_offset(m.plane.get_center())
+        #         .set_scale(m.plane.get_x_unit_size())
+        #         .replace(m.plane)
+        #     )
 
-        fractals = Group(f_group, j_group)
+        # fractals = Group(f_group, j_group)
+        fractals = Group(j_group)
         return fractals
 
     def construct(self):
         # Introduce terms
-        f_group, j_group = self.get_fractals()
+        j_group = self.get_fractals()
         f_name, j_name = VGroup(
             Text("Fatou set"),
             Text("Julia set"),
         )
-        f_name.next_to(f_group, UP, MED_LARGE_BUFF)
-        j_name.next_to(j_group, UP, MED_LARGE_BUFF)
+        # f_name.next_to(f_group, UP, MED_LARGE_BUFF)
+        # j_name.next_to(j_group, UP, MED_LARGE_BUFF)
 
-        self.play(Write(j_name), GrowFromCenter(j_group))
+        # self.play(Write(j_name), GrowFromCenter(j_group))
         self.wait()
-        self.play(Write(f_name), *map(GrowFromCenter, f_group))
-        self.wait()
+        # self.play(Write(f_name), *map(GrowFromCenter, f_group))
+        # self.wait()
 
         # Define Fatou set
         # fatou_condition = self.get_fatou_condition()
@@ -466,7 +445,7 @@ class TestScene(Scene):
         # f_line.next_to(fatou_condition, DOWN)
         # f_line.set_stroke(WHITE, 1)
 
-        self.play(FadeOut(j_name, RIGHT), FadeOut(j_group, RIGHT))  # , Write(lhs))
+        # self.play(FadeOut(j_name, RIGHT), FadeOut(j_group, RIGHT))  # , Write(lhs))
         self.wait()
         # for words in lhs[-1]:
         #     self.play(Indicate(words, buff=0, time_width=1.5))
