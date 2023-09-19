@@ -7,6 +7,8 @@ from functools import reduce
 import random
 import itertools as it
 
+from manim.utils.color import WHITE
+
 
 # class SquareExample(Scene):
 #     def construct(self):
@@ -18,7 +20,7 @@ import itertools as it
 #         self.play(Create(vmob))
 
 FRAME_WIDTH = 10
-
+ROOT_COLORS_BRIGHT = [RED, GREEN, BLUE, YELLOW, MAROON_B]
 
 def poly(x, coefs):
     return sum(coefs[k] * x**k for k in range(len(coefs)))
@@ -91,6 +93,7 @@ class NewtonFractal(Mobject):
         self.roots = []
 
         super().__init__()
+        self.set_points([[UL, DL, UR, DR]])
         self.set_colors(self.colors)
         self.set_julia_highlight(self.julia_highlight)
         self.set_coefs(self.coefs)
@@ -141,7 +144,7 @@ class NewtonFractal(Mobject):
         # 返回 mobject 本身
         return self
 
-    def set_roots(self, roots = [1], reset_coefs=True):
+    def set_roots(self, roots , reset_coefs=True):
         # 将 roots 中的根转换为复数
         full_roots = [*roots] + [0] * (self.max_degree - len(roots))
         roots = list(map(complex, full_roots))
@@ -363,104 +366,54 @@ class MentionFatouSetsAndJuliaSets(Scene):
 
         return result
 
+# class MyMobject(Mobject):
+    # def __init__(self, color=..., name=None, dim=3, target=None, z_index=0):
+        
+        # super().__init__(color, name, dim, target, z_index)
 
 class TestScene(Scene):
+    coefs = [1.0, -1.0, 1.0, 0.0, 0.0, 1.0]
+    plane_config = {
+        "x_range": (-4, 4),
+        "y_range": (-4, 4),
+        "height": 16,
+        "width": 16,
+        "background_line_style": {
+            "stroke_color": GREY_A,
+            "stroke_width": 1.0,
+        },
+        "axis_config": {
+            "stroke_width": 1.0,
+        },
+    }
+    n_steps = 30
+
     colors = [RED_E, BLUE_E, TEAL_E, MAROON_E]
 
-    def get_plane(self):
-        plane = ComplexPlane(
-            # (-2, 2),
-            # (-2, 2),
-            # background_line_style={"stroke_width": 1, "stroke_color": GREY},
+
+    def get_fractal(self, plane, colors=ROOT_COLORS_DEEP, n_steps=30):
+        return NewtonFractal(
+            plane,
+            colors=colors,
+            coefs=self.coefs,
+            n_steps=n_steps,
         )
-        plane.set_height(2)
-        plane.set_opacity(0)
-        box = SurroundingRectangle(plane, buff=0)
-        box.set_stroke(WHITE, 1)
-        plane.add(box)
-        return plane
+    
+    def init_fractal(self, root_colors=ROOT_COLORS_DEEP):
+        plane = ComplexPlane()
+        fractal = self.get_fractal(
+            plane,
+            colors=root_colors,
+            n_steps=self.n_steps,
+        )
+        return fractal
 
-    def get_fractals(self, jy=1.5, fy=-2.5):
-        coefs = roots_to_coefficients([-1.5, 1.5, 1j, -1j])
-        n = len(coefs) - 1
-        colors = self.colors
-        f_planes = VGroup(*(self.get_plane() for x in range(n)))
-        f_planes.arrange(RIGHT, buff=LARGE_BUFF)
-        # plusses = [Tex("+") for _ in range(n - 1)]  # Tex("+").replicate(n - 1)
-        # f_group = Group(*it.chain(*zip(f_planes, plusses)))
-        # f_group.add(f_planes[-1])
-        # f_group.arrange(RIGHT)
-        # fatou = Group(
-        #     *(
-        #         NewtonFractal(f_plane, coefs=coefs, colors=colors)
-        #         for f_plane in f_planes
-        #     )
-        # )
-        # for i, fractal in enumerate(fatou):
-        #     opacities = n * [0.2]
-        #     opacities[i] = 1
-        #     fractal.set_opacities(*opacities)
-        # f_group.add(*fatou)
-        # f_group.set_y(fy)
-
-        j_plane = self.get_plane()
-        j_plane.set_y(jy)
-        julia = NewtonFractal(j_plane, coefs=coefs, colors=5 * [GREY_A])
-        julia.set_julia_highlight(1e-3)
-        j_group = Group(julia, j_plane)
-
-        # for fractal, plane in zip((*fatou, julia), (*f_planes, j_plane)):
-        #     fractal.plane = plane
-        #     fractal.add_updater(
-        #         lambda m: m.set_offset(m.plane.get_center())
-        #         .set_scale(m.plane.get_x_unit_size())
-        #         .replace(m.plane)
-        #     )
-
-        # fractals = Group(f_group, j_group)
-        fractals = Group(j_group)
-        return fractals
 
     def construct(self):
         # Introduce terms
-        coefs = [-1.5, 1.5, 1j, -1j]
-        j_plane = ComplexPlane()
-        julia = NewtonFractal(j_plane, coefs=coefs, colors=5 * [GREY_A])
-        julia.set_julia_highlight(1e-3)
-        f_name, j_name = VGroup(
-            Text("Fatou set"),
-            Text("Julia set"),
-        )
-        print(julia.get_all_points())
-        # f_name.next_to(f_group, UP, MED_LARGE_BUFF)
-        # j_name.next_to(j_group, UP, MED_LARGE_BUFF)
-
-        # self.play(Write(j_name), GrowFromCenter(j_group))
-        self.add(julia)
-        # self.play(Write(f_name), *map(GrowFromCenter, f_group))
-        # self.wait()
-
-        # Define Fatou set
-        # fatou_condition = self.get_fatou_condition()
-        # fatou_condition.set_width(FRAME_WIDTH - 1)
-        # fatou_condition.center().to_edge(UP, buff=1.0)
-        # lhs, arrow, rhs = fatou_condition
-        # f_line = Line(LEFT, RIGHT)
-        # f_line.match_width(fatou_condition)
-        # f_line.next_to(fatou_condition, DOWN)
-        # f_line.set_stroke(WHITE, 1)
-
-        # self.play(FadeOut(j_name, RIGHT), FadeOut(j_group, RIGHT))  # , Write(lhs))
-        # self.wait()
-        # for words in lhs[-1]:
-        #     self.play(Indicate(words, buff=0, time_width=1.5))
-        # self.play(Write(arrow))
-        # self.play(
-        #     LaggedStart(
-        #         FadeTransform(f_name.copy(), rhs[1][:8]), FadeIn(rhs), lag_ratio=0.5
-        #     )
-        # )
-        # self.wait()
+        fractal = self.init_fractal(root_colors=ROOT_COLORS_BRIGHT)
+        # fractal = self.init_fractal()
+        self.add(fractal)
 
 
 if __name__ == "__main__":
@@ -468,3 +421,6 @@ if __name__ == "__main__":
         [1.0, -1.0, 1.0, 0.0, 0.0, 1.0]
     )  # 传入系数矩阵，解方程z^5 + z^2 - z + 1 = 0，并且获得根
     print([x**5 + x**2 - x**1 + 1 for x in roots])
+    print(*roots)
+
+
