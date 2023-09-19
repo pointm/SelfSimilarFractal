@@ -72,7 +72,7 @@ ROOT_COLORS_DEEP = ["#440154", "#3b528b", "#21908c", "#5dc963", "#29abca"]
 
 class NewtonFractal(Mobject):
     def __init__(self, plane, **kwargs):
-        self.shader_folder = "newton_fractal"
+        self.shader_folder = r"C:\Users\Feynman\Documents\00课件-2023春-2023秋\manim_projekt\3B1Bvideos\manimlib\shaders\newton_fractal"
         self.shader_dtype = [
             ("point", np.float32, (3,)),
         ]
@@ -424,3 +424,10 @@ if __name__ == "__main__":
     print(*roots)
 
 
+class OpenGLShow(Scene):#这是一个可互动的场景，使用 manim .\testslice.py -p OpenGLShow --renderer=opengl进行渲染并且进行互动
+    #需要注意的是必须传递参数-p，不然的话，就很麻烦很麻烦，因为不会自动弹出窗口让你操作
+    def construct(self):
+        circ = Circle()
+        square = Square()
+        self.add(circ, square)
+        self.interactive_embed()
