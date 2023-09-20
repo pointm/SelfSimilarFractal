@@ -22,6 +22,7 @@ from manim.utils.color import WHITE
 FRAME_WIDTH = 10
 ROOT_COLORS_BRIGHT = [RED, GREEN, BLUE, YELLOW, MAROON_B]
 
+
 def poly(x, coefs):
     return sum(coefs[k] * x**k for k in range(len(coefs)))
 
@@ -144,7 +145,7 @@ class NewtonFractal(Mobject):
         # 返回 mobject 本身
         return self
 
-    def set_roots(self, roots , reset_coefs=True):
+    def set_roots(self, roots, reset_coefs=True):
         # 将 roots 中的根转换为复数
         full_roots = [*roots] + [0] * (self.max_degree - len(roots))
         roots = list(map(complex, full_roots))
@@ -366,10 +367,12 @@ class MentionFatouSetsAndJuliaSets(Scene):
 
         return result
 
+
 # class MyMobject(Mobject):
-    # def __init__(self, color=..., name=None, dim=3, target=None, z_index=0):
-        
-        # super().__init__(color, name, dim, target, z_index)
+# def __init__(self, color=..., name=None, dim=3, target=None, z_index=0):
+
+# super().__init__(color, name, dim, target, z_index)
+
 
 class TestScene(Scene):
     coefs = [1.0, -1.0, 1.0, 0.0, 0.0, 1.0]
@@ -390,7 +393,6 @@ class TestScene(Scene):
 
     colors = [RED_E, BLUE_E, TEAL_E, MAROON_E]
 
-
     def get_fractal(self, plane, colors=ROOT_COLORS_DEEP, n_steps=30):
         return NewtonFractal(
             plane,
@@ -398,7 +400,7 @@ class TestScene(Scene):
             coefs=self.coefs,
             n_steps=n_steps,
         )
-    
+
     def init_fractal(self, root_colors=ROOT_COLORS_DEEP):
         plane = ComplexPlane()
         fractal = self.get_fractal(
@@ -407,7 +409,6 @@ class TestScene(Scene):
             n_steps=self.n_steps,
         )
         return fractal
-
 
     def construct(self):
         # Introduce terms
@@ -424,10 +425,29 @@ if __name__ == "__main__":
     print(*roots)
 
 
-class OpenGLShow(Scene):#这是一个可互动的场景，使用 manim .\testslice.py -p OpenGLShow --renderer=opengl进行渲染并且进行互动
-    #需要注意的是必须传递参数-p，不然的话，就很麻烦很麻烦，因为不会自动弹出窗口让你操作
+class OpenGLShow(
+    Scene
+):  # 这是一个可互动的场景，使用 manim .\testslice.py -p OpenGLShow --renderer=opengl进行渲染并且进行互动
+    # 需要注意的是必须传递参数-p，不然的话，就很麻烦很麻烦，因为不会自动弹出窗口让你操作
     def construct(self):
         circ = Circle()
         square = Square()
         self.add(circ, square)
         self.interactive_embed()
+
+
+class TestGlsl(Scene):  # 这个GLSL没啥子用
+    def construct(self):
+        square = Square(side_length=4)
+        square.set_color_by_code(
+            f"""
+            vec3 blue = vec3{tuple(hex_to_rgb(BLUE))};
+            vec3 red = vec3{tuple(hex_to_rgb(RED))};
+            color.rgb = mix(blue, red, (point.x + 1.5) / 3);
+        """
+        )
+        self.add(square)
+
+        # hex_to_rgb 会将 16 进制颜色字符串转变为 RGB 三元列表，其值范围均为 [0,1]
+        # 利用 tuple 将它们用圆括号括起来，翻译后的字符串就变为（这里仅展示一部分）
+        # vec3 blue = vec3(0.345, 0.769, 0.867);
