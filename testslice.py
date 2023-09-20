@@ -7,7 +7,7 @@ from functools import reduce
 import random
 import itertools as it
 
-from manim.utils.color import WHITE
+# from manim.utils.color import WHITE
 
 
 # class SquareExample(Scene):
@@ -451,3 +451,13 @@ class TestGlsl(Scene):  # 这个GLSL没啥子用
         # hex_to_rgb 会将 16 进制颜色字符串转变为 RGB 三元列表，其值范围均为 [0,1]
         # 利用 tuple 将它们用圆括号括起来，翻译后的字符串就变为（这里仅展示一部分）
         # vec3 blue = vec3(0.345, 0.769, 0.867);
+
+class GradientImageFromArray(Scene):
+    def construct(self):
+        n = 256
+        imageArray = np.uint8(
+            [[i * 256 / n for i in range(0, n)] for _ in range(0, n)]
+        )
+        image = ImageMobject(imageArray).scale(2)
+        image.background_rectangle = SurroundingRectangle(image, GREEN)
+        self.add(image, image.background_rectangle)
