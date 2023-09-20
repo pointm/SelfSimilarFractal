@@ -28,7 +28,7 @@ class NewJulia(Scene):
         # 创建一个包含所有点对象的VGroup对象
         dots = VGroup()
         # 遍历复平面上的每个点，根据是否属于茱莉亚集添加到VGroup对象中
-        step = 0.01
+        step = 0.02
         for x in np.arange(-2, 2, step):
             for y in np.arange(-2, 2, step):
                 z = complex(x, y)
@@ -36,12 +36,16 @@ class NewJulia(Scene):
                 if julia:  # 最大的边界值为4，迭代次数为20
                     dots.add(
                         Square(
-                            side_length=step,
+                            side_length=step * 1.1,
+                            # color=Color(
+                            #     hue=amplitude / limitation, saturation=1, luminance=0.5
+                            # ),
+                            # color=Color(
+                            #     hue=1, saturation=amplitude / limitation, luminance=0.5
+                            # ),
                             color=Color(
-                                hue=amplitude / limitation, saturation=1, luminance=0.5
+                                hue=0.3, saturation=1, luminance=amplitude / limitation
                             ),
-                            #  color = Color(hue = 1, saturation = amplitude/limitation, luminance = 0.5),
-                            #  color = Color(hue = 0.3, saturation = 1, luminance = amplitude/limitation),
                             fill_opacity=1,
                         )
                         .move_to([x, y, 0])
