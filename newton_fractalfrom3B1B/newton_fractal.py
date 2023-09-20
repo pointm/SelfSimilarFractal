@@ -5,7 +5,7 @@ from roots_and_coefs import roots_to_coefficients
 from roots_and_coefs import dpoly
 from roots_and_coefs import poly
 
-from manim import *
+# from manim import *
 import itertools as it
 
 ROOT_COLORS_BRIGHT = [RED, GREEN, BLUE, YELLOW, MAROON_B]
