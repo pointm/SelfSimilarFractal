@@ -417,12 +417,12 @@ class TestScene(Scene):
         self.add(fractal)
 
 
-if __name__ == "__main__":
-    roots = coefficients_to_roots(
-        [1.0, -1.0, 1.0, 0.0, 0.0, 1.0]
-    )  # 传入系数矩阵，解方程z^5 + z^2 - z + 1 = 0，并且获得根
-    print([x**5 + x**2 - x**1 + 1 for x in roots])
-    print(*roots)
+# if __name__ == "__main__":
+#     roots = coefficients_to_roots(
+#         [1.0, -1.0, 1.0, 0.0, 0.0, 1.0]
+#     )  # 传入系数矩阵，解方程z^5 + z^2 - z + 1 = 0，并且获得根
+#     print([x**5 + x**2 - x**1 + 1 for x in roots])
+#     print(*roots)
 
 
 class OpenGLShow(
@@ -452,25 +452,21 @@ class TestGlsl(Scene):  # 这个GLSL没啥子用
         # 利用 tuple 将它们用圆括号括起来，翻译后的字符串就变为（这里仅展示一部分）
         # vec3 blue = vec3(0.345, 0.769, 0.867);
 
+
 class GradientImageFromArray(Scene):
     def construct(self):
         n = 256
-        imageArray = np.uint8(
-            [[i * 256 / n for i in range(0, n)] for _ in range(0, n)]
-        )
+        imageArray = np.uint8([[i * 256 / n for i in range(0, n)] for _ in range(0, n)])
         image = ImageMobject(imageArray).scale(2)
         image.background_rectangle = SurroundingRectangle(image, GREEN)
         self.add(image, image.background_rectangle)
 
-from manim import *
 
 class ImageInterpolationEx(Scene):
     def construct(self):
-        img = ImageMobject(np.uint8([[63, 0, 0, 0],
-                                        [0, 127, 0, 0],
-                                        [0, 0, 191, 0],
-                                        [0, 0, 0, 255]
-                                        ]))
+        img = ImageMobject(
+            np.uint8([[63, 0, 0, 0], [0, 127, 0, 0], [0, 0, 191, 0], [0, 0, 0, 255]])
+        )
 
         img.height = 2
         img1 = img.copy()
@@ -484,12 +480,21 @@ class ImageInterpolationEx(Scene):
         img3.set_resampling_algorithm(RESAMPLING_ALGORITHMS["linear"])
         img4.set_resampling_algorithm(RESAMPLING_ALGORITHMS["cubic"])
         img5.set_resampling_algorithm(RESAMPLING_ALGORITHMS["box"])
-        img1.add(Text("nearest").scale(0.5).next_to(img1,UP))
-        img2.add(Text("lanczos").scale(0.5).next_to(img2,UP))
-        img3.add(Text("linear").scale(0.5).next_to(img3,UP))
-        img4.add(Text("cubic").scale(0.5).next_to(img4,UP))
-        img5.add(Text("box").scale(0.5).next_to(img5,UP))
+        img1.add(Text("nearest").scale(0.5).next_to(img1, UP))
+        img2.add(Text("lanczos").scale(0.5).next_to(img2, UP))
+        img3.add(Text("linear").scale(0.5).next_to(img3, UP))
+        img4.add(Text("cubic").scale(0.5).next_to(img4, UP))
+        img5.add(Text("box").scale(0.5).next_to(img5, UP))
 
-        x= Group(img1,img2,img3,img4,img5)
+        x = Group(img1, img2, img3, img4, img5)
         x.arrange()
         self.add(x)
+
+
+class ImageFromArray(Scene):
+    def construct(self):
+        image = ImageMobject(
+            np.uint8([[[255, 0, 0], [0, 0, 255]], [[255, 0, 0], [0, 0, 255]]])
+        )
+        image.height = 7
+        self.add(image)
