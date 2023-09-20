@@ -524,29 +524,34 @@ class UseRGB(Scene):
         return int(hex_string[1:], 16)
 
     def construct(self):
-        hex_list = [
-            ["#FF0000", "#00FF00", "#0000FF", "#FFFF00"],
-            ["#FF00FF", "#00FFFF", "#000000", "#FFFFFF"],
-            ["#C0C0C0", "#808080", "#800000", "#808000"],
-            ["#008000", "#800080", "#008080", "#000080"],
-            ["#F0F8FF", "#FAEBD7", "#7FFFD4", "#FFE4C4"],
-        ]
+        # hex_list = [
+        #     ["#FF0000", "#00FF00", "#0000FF", "#FFFF00"],
+        #     ["#FF00FF", "#00FFFF", "#000000", "#FFFFFF"],
+        #     ["#C0C0C0", "#808080", "#800000", "#808000"],
+        #     ["#008000", "#800080", "#008080", "#000080"],
+        #     ["#F0F8FF", "#FAEBD7", "#7FFFD4", "#FFE4C4"],
+        # ]
 
-        int_list = []
-        for sub_list in hex_list:
-            int_sub_list = []
-            for hex_string in sub_list:
-                int_sub_list.append(int(hex_string[1:], 16))
-                int_list.append(int_sub_list)
+        # int_list = []
+        # for sub_list in hex_list:
+        #     int_sub_list = []
+        #     for hex_string in sub_list:
+        #         int_sub_list.append(int(hex_string[1:], 16))
+        #         int_list.append(int_sub_list)
 
-        print(int_list)
-        # hex_list = int(*hex_list[1:], 16)
-        hex_list = self.convert_to_3d_rgb(int_list)
-        random_int = hex_list
-        print(random_int)
+        # print(int_list)
+        # # hex_list = int(*hex_list[1:], 16)
+        # hex_list = self.convert_to_3d_rgb(int_list)
+        # random_int = hex_list
+        # print(random_int)
+        random_int = [random.randint(0, 255) for _ in range(5 * 4 * 3)]
         
+        color_group = np.array(random_int).reshape(5,4,3)
+        random_int = color_group
+        print(random_int)
         image = ImageMobject(np.uint8(random_int))
         image.set_resampling_algorithm(RESAMPLING_ALGORITHMS["box"])
         image.height = 5
         self.add(image)
+
         return super().construct()
