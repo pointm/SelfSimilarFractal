@@ -544,12 +544,13 @@ class UseRGB(Scene):
         # hex_list = self.convert_to_3d_rgb(int_list)
         # random_int = hex_list
         # print(random_int)
-        random_int = [random.randint(0, 255) for _ in range(5 * 4 * 3)]
-        
-        color_group = np.array(random_int).reshape(5,4,3)
+        random_int = [random.randint(0, 255) for _ in range(5 * 5 * 3)]
+
+        color_group = np.array(random_int).reshape(5, 5, 3)  # 五行四列，每个元素的元胞个数是三
         random_int = color_group
-        print(random_int)
+        # print(random_int)
         image = ImageMobject(np.uint8(random_int))
+        print(image.get_pixel_array())
         image.set_resampling_algorithm(RESAMPLING_ALGORITHMS["box"])
         image.height = 5
         self.add(image)
