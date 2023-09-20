@@ -65,7 +65,7 @@ vec2 dpoly(vec2 z, vec2[MAX_DEGREE + 1] coefs){
 vec2 seek_root(vec2 z, vec2[MAX_DEGREE + 1] coefs, int max_steps, out float n_iters){
     float last_len;
     float curr_len;
-    float threshold = CLOSE_ENOUGH;
+    float threshold = CLOSE_ENOUGH;//1e-3
 
     for(int i = 0; i < max_steps; i++){
         last_len = curr_len;
