@@ -491,10 +491,62 @@ class ImageInterpolationEx(Scene):
         self.add(x)
 
 
-class ImageFromArray(Scene):
+import random
+
+
+class ColorfulArray(Scene):
     def construct(self):
-        image = ImageMobject(
-            np.uint8([[[255, 0, 0], [0, 0, 255]], [[255, 0, 0], [0, 0, 255]]])
-        )
-        image.height = 7
+        random_integers = [random.randint(0, 255) for _ in range(60)]
+        result = [random_integers[i : i + 3] for i in range(0, len(random_integers), 3)]
+        big_list = [result[i : i + 5] for i in range(0, len(result), 5)]
+        print(big_list)
+
+        image = ImageMobject(np.uint8(big_list))
+        image.set_resampling_algorithm(RESAMPLING_ALGORITHMS["box"])
+        image.height = 10
         self.add(image)
+
+
+class UseRGB(Scene):
+    def convert_to_3d_rgb(self, rgb_list):
+        result = []
+        for row in rgb_list:
+            new_row = []
+            for rgb in row:
+                r = (rgb >> 16) & 0xFF
+                g = (rgb >> 8) & 0xFF
+                b = rgb & 0xFF
+                new_row.append([r, g, b])
+            result.append(new_row)
+        return result
+
+    def convert_hex_to_int(hex_string):
+        return int(hex_string[1:], 16)
+
+    def construct(self):
+        hex_list = [
+            ["#FF0000", "#00FF00", "#0000FF", "#FFFF00"],
+            ["#FF00FF", "#00FFFF", "#000000", "#FFFFFF"],
+            ["#C0C0C0", "#808080", "#800000", "#808000"],
+            ["#008000", "#800080", "#008080", "#000080"],
+            ["#F0F8FF", "#FAEBD7", "#7FFFD4", "#FFE4C4"],
+        ]
+
+        int_list = []
+        for sub_list in hex_list:
+            int_sub_list = []
+            for hex_string in sub_list:
+                int_sub_list.append(int(hex_string[1:], 16))
+                int_list.append(int_sub_list)
+
+        print(int_list)
+        # hex_list = int(*hex_list[1:], 16)
+        hex_list = self.convert_to_3d_rgb(int_list)
+        random_int = hex_list
+        print(random_int)
+        
+        image = ImageMobject(np.uint8(random_int))
+        image.set_resampling_algorithm(RESAMPLING_ALGORITHMS["box"])
+        image.height = 5
+        self.add(image)
+        return super().construct()
