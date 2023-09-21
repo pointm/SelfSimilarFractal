@@ -87,8 +87,8 @@ import matplotlib.pyplot as plt
 #     "winter",
 # ]
 
-config.frame_width = 5
-# config.frame_height = 2
+config.frame_width = 6
+# config.frame_height = 3
 
 
 def is_julia(z, c, ita, lim):
@@ -118,19 +118,19 @@ class TestSceneForImageMobject(Scene):
         c = complex(-0.12, 0.65)  # 茱莉亚集合里面的常数为0.12 + 0.15j
         offset = [0, 0]
         center = [0 + offset[0], 0 + offset[1]]
-        radius = 1.75
+        radius = 1.5
         x_range = [center[0] - radius, center[0] + radius]
         y_range = [center[1] - radius, center[1] + radius]
         unitnumber = 1000
         # colors = [[255, 0, 0], [0, 255, 0], [0, 0, 255]]
-        xunit = yunit = unitnumber 
+        xunit = yunit = unitnumber
         totalunit = xunit * yunit
         # 创建一个 jet colormap
-        cmap = plt.cm.rainbow
+        cmap = plt.cm.summer
         # 获取 colormap 中的所有颜色
-        colors = cmap(np.linspace(0, 1, 256)) * 255
+        colors = cmap(np.linspace(0, 1, ita_num)) * 255
         colors = [subcolor[:-1] for subcolor in colors]
-        colors.reverse()
+        # colors.reverse()
 
         # 获取每个颜色的 RGB 值
         for i in range(len(colors)):
@@ -151,7 +151,7 @@ class TestSceneForImageMobject(Scene):
                 if julia:
                     randomcolor[i][j] = [0, 0, 0]
                 else:
-                    randomcolor[i][j] = colors[num * 12 % len(colors)]
+                    randomcolor[i][j] = colors[num % len(colors)]
                 coorcomplex.append(complexvar)
                 # dots.add(Dot(plane.n2p(complexvar), radius=0.02))
 
