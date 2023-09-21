@@ -115,13 +115,13 @@ class TestSceneForImageMobject(Scene):
     def construct(self):
         ita_num = 20  # 迭代次数为20
         limitation = 4  # 迭代的最大幅值为4
-        c = complex(-0.12, 0.65)  # 茱莉亚集合里面的常数为0.12 + 0.15j
+        c = complex(0.4, 0.4)  # 茱莉亚集合里面的常数为0.12 + 0.15j
         offset = [0, 0]
         center = [0 + offset[0], 0 + offset[1]]
         radius = 1.5
         x_range = [center[0] - radius, center[0] + radius]
         y_range = [center[1] - radius, center[1] + radius]
-        unitnumber = 1000
+        unitnumber = 1500
         # colors = [[255, 0, 0], [0, 255, 0], [0, 0, 255]]
         xunit = yunit = unitnumber
         totalunit = xunit * yunit

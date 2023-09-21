@@ -10,6 +10,6 @@ Then use the following command:
 ```
 manim .\JuliaSetinManim.py -p NewJulia --disable_caching
 ```
-![Image text](NewJulia_ManimCE_v0.17.3.png)
+![Image text](TestSceneForImageMobject_ManimCE_v0.17.3.png)
 
 It may take some time to render this scene. You can reduce the time by setting the output video quality to a lower level.
