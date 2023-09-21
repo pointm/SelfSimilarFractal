@@ -1,8 +1,94 @@
 from manim import *
-import random
 
-config.frame_width = 8
-# config.frame_height = 8
+# import random
+import matplotlib.pyplot as plt
+
+# [详细的配色方案如下
+#     "Accent",
+#     "Blues",
+#     "BrBG",
+#     "BuGn",
+#     "BuPu",
+#     "CMRmap",
+#     "Dark2",
+#     "GnBu",
+#     "Greens",
+#     "Greys",
+#     "OrRd",
+#     "Oranges",
+#     "PRGn",
+#     "Paired",
+#     "Pastel1",
+#     "Pastel2",
+#     "PiYG",
+#     "PuBu",
+#     "PuBuGn",
+#     "PuOr",
+#     "PuRd",
+#     "Purples",
+#     "RdBu",
+#     "RdGy",
+#     "RdPu",
+#     "RdYlBu",
+#     "RdYlGn",
+#     "Reds",
+#     "Set1",
+#     "Set2",
+#     "Set3",
+#     "Spectral",
+#     "Wistia",
+#     "YlGn",
+#     "YlGnBu",
+#     "YlOrBr",
+#     "YlOrRd",
+#     "afmhot",
+#     "autumn",
+#     "binary",
+#     "bone",
+#     "brg",
+#     "bwr",
+#     "cividis",
+#     "cool",
+#     "coolwarm",
+#     "copper",
+#     "cubehelix",
+#     "flag",
+#     "gist_earth",
+#     "gist_gray",
+#     "gist_heat",
+#     "gist_ncar",
+#     "gist_stern",
+#     "gist_yarg",
+#     "gnuplot",
+#     "gnuplot2",
+#     "gray",
+#     "hot",
+#     "hsv",
+#     "inferno",
+#     "jet",
+#     "magma",
+#     "nipy_spectral",
+#     "ocean",
+#     "pink",
+#     "plasma",
+#     "prism",
+#     "rainbow",
+#     "seismic",
+#     "spring",
+#     "summer",
+#     "tab10",
+#     "tab20",
+#     "tab20b",
+#     "tab20c",
+#     "terrain",
+#     "twilight",
+#     "twilight_shifted",
+#     "viridis",
+#     "winter",
+# ]
+
+config.frame_width = 5
+# config.frame_height = 2
 
 
 def is_julia(z, c, ita, lim):
@@ -30,17 +116,30 @@ class TestSceneForImageMobject(Scene):
         ita_num = 20  # 迭代次数为20
         limitation = 4  # 迭代的最大幅值为4
         c = complex(-0.12, 0.65)  # 茱莉亚集合里面的常数为0.12 + 0.15j
-        x_range = [-3, 3]
-        y_range = [-3, 3]
+        offset = [0, 0]
+        center = [0 + offset[0], 0 + offset[1]]
+        radius = 1.75
+        x_range = [center[0] - radius, center[0] + radius]
+        y_range = [center[1] - radius, center[1] + radius]
         unitnumber = 1000
-        colors = [[255, 0, 0], [0, 255, 0], [0, 0, 255]]
-        xunit = yunit = unitnumber
+        # colors = [[255, 0, 0], [0, 255, 0], [0, 0, 255]]
+        xunit = yunit = unitnumber 
         totalunit = xunit * yunit
+        # 创建一个 jet colormap
+        cmap = plt.cm.rainbow
+        # 获取 colormap 中的所有颜色
+        colors = cmap(np.linspace(0, 1, 256)) * 255
+        colors = [subcolor[:-1] for subcolor in colors]
+        colors.reverse()
+
+        # 获取每个颜色的 RGB 值
+        for i in range(len(colors)):
+            print(colors[i])
 
         plane = ComplexPlane()
         self.add(plane)
 
-        randomcolor = [random.randint(0, 255) for _ in range(xunit * yunit * 3)]
+        randomcolor = [0 for _ in range(xunit * yunit * 3)]
         randomcolor = np.array(randomcolor).reshape(xunit, yunit, 3)
 
         coorcomplex = []
@@ -52,9 +151,9 @@ class TestSceneForImageMobject(Scene):
                 if julia:
                     randomcolor[i][j] = [0, 0, 0]
                 else:
-                    randomcolor[i][j] = colors[num % len(colors)]
+                    randomcolor[i][j] = colors[num * 12 % len(colors)]
                 coorcomplex.append(complexvar)
-                # dots.add(Dot(plane.n2p(complexvar), radius=0.1))
+                # dots.add(Dot(plane.n2p(complexvar), radius=0.02))
 
         coorcomplex = np.array(coorcomplex).reshape(xunit, yunit)
 
@@ -63,7 +162,8 @@ class TestSceneForImageMobject(Scene):
         image = ImageMobject(np.uint8(randomcolor))
         image.set_resampling_algorithm(RESAMPLING_ALGORITHMS["nearest"])
         image.height = abs(x_range[0] - x_range[1])
-        image.move_to([np.mean(x_range), np.mean(y_range), 0])
+        # image.height = abs(4)
+        # image.move_to([np.mean(x_range), np.mean(y_range), 0])
         self.add(image.set_opacity(1))
         return super().construct()
 
