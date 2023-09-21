@@ -33,7 +33,7 @@ class TestSceneForImageMobject(Scene):
         x_range = [-3, 3]
         y_range = [-3, 3]
         unitnumber = 1000
-
+        colors = [[255, 0, 0], [0, 255, 0], [0, 0, 255]]
         xunit = yunit = unitnumber
         totalunit = xunit * yunit
 
@@ -50,7 +50,9 @@ class TestSceneForImageMobject(Scene):
                 complexvar = self.calccomplex(x_range, y_range, xunit, yunit, i, j)
                 [julia, num, amplitude] = is_julia(complexvar, c, ita_num, limitation)
                 if julia:
-                    randomcolor[i][j] = [0,0,0]
+                    randomcolor[i][j] = [0, 0, 0]
+                else:
+                    randomcolor[i][j] = colors[num % len(colors)]
                 coorcomplex.append(complexvar)
                 # dots.add(Dot(plane.n2p(complexvar), radius=0.1))
 
@@ -60,8 +62,8 @@ class TestSceneForImageMobject(Scene):
 
         image = ImageMobject(np.uint8(randomcolor))
         image.set_resampling_algorithm(RESAMPLING_ALGORITHMS["nearest"])
-        image.height = abs(x_range[0]-x_range[1])
-        image.move_to([np.mean(x_range),np.mean(y_range),0])
+        image.height = abs(x_range[0] - x_range[1])
+        image.move_to([np.mean(x_range), np.mean(y_range), 0])
         self.add(image.set_opacity(1))
         return super().construct()
 
